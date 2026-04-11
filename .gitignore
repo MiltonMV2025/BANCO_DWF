@@ -1,0 +1,32 @@
+# Build outputs
+target/
+out/
+build/
+
+# Maven wrapper and local metadata
+.mvn/wrapper/maven-wrapper.jar
+dependency-reduced-pom.xml
+
+# IDE settings
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.*
+
+# Runtime files
+*.pid
+*.seed
