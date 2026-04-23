@@ -1,0 +1,238 @@
+:root {
+    --panel-bg: #070b11;
+    --accent: #f5c400;
+    --text-main: #111827;
+    --text-muted: #6b7280;
+    --border-color: #e5e7eb;
+    --danger: #b91c1c;
+    --success: #166534;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background: #f3f4f6;
+}
+
+.login-layout {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: minmax(320px, 42%) 1fr;
+}
+
+.brand-panel {
+    background:
+            radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.08) 0 2px, transparent 2px 100%),
+            linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+            var(--panel-bg);
+    background-size: auto, 32px 32px, 32px 32px, auto;
+    color: #fff;
+    padding: 4rem 3.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.brand-content h1 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 1.1;
+    margin-bottom: 1.1rem;
+}
+
+.brand-line {
+    width: 70px;
+    height: 4px;
+    background: var(--accent);
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.brand-content p {
+    color: #d1d5db;
+    font-size: 1.1rem;
+}
+
+.form-panel {
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+}
+
+.form-card {
+    width: 100%;
+    max-width: 420px;
+}
+
+.form-card h2 {
+    font-size: 2rem;
+    color: var(--text-main);
+    margin-bottom: 0.4rem;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    margin-bottom: 1.4rem;
+}
+
+.alerts {
+    min-height: 1.75rem;
+}
+
+.alert {
+    font-size: 0.9rem;
+    margin-bottom: 0.8rem;
+}
+
+.alert-error {
+    color: var(--danger);
+}
+
+.alert-success {
+    color: var(--success);
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.login-form label {
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 0.93rem;
+}
+
+.login-form input {
+    height: 44px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0 0.9rem;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.login-form input:focus {
+    border-color: #c7a008;
+    box-shadow: 0 0 0 3px rgba(245, 196, 0, 0.2);
+}
+
+.password-group {
+    position: relative;
+}
+
+.password-group input {
+    width: 100%;
+    padding-right: 2.8rem;
+}
+
+.eye-btn {
+    position: absolute;
+    right: 0.4rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1.05rem;
+    color: #9ca3af;
+    width: 34px;
+    height: 34px;
+}
+
+.btn-login {
+    margin-top: 0.7rem;
+    height: 46px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #111;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter .2s;
+}
+
+.btn-login:hover {
+    filter: brightness(0.95);
+}
+
+.forgot-link {
+    display: block;
+    margin: 1.2rem auto 0;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.copyright {
+    margin-top: 2.8rem;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal-backdrop.show {
+    display: flex;
+}
+
+.modal {
+    width: min(460px, 100%);
+    background: #fff;
+    border-radius: 14px;
+    padding: 1.2rem 1.2rem 1rem;
+}
+
+.modal h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+.modal p {
+    color: #374151;
+    margin-bottom: 1rem;
+}
+
+.btn-close-modal {
+    border: none;
+    border-radius: 9px;
+    background: #111827;
+    color: #fff;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+}
+
+@media (max-width: 920px) {
+    .login-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .brand-panel {
+        min-height: 240px;
+        padding: 2.3rem 1.5rem;
+    }
+
+    .brand-content h1 {
+        font-size: 2rem;
+    }
+}
