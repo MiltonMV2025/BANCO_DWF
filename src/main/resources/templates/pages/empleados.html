@@ -24,55 +24,50 @@
             </button>
         </section>
 
+        <form class="filters-row" method="get" th:action="@{/gerencia/empleados}">
+            <input type="text" id="search-employee" name="q" th:value="${qEmpleados}" placeholder="Buscar por nombre o rol">
+            <select id="status-filter-employee" name="estado">
+                <option value="" th:selected="${estadoEmpleados == null or estadoEmpleados.isEmpty()}">Todos los estados</option>
+                <option value="ACTIVO" th:selected="${estadoEmpleados == 'ACTIVO'}">Activos</option>
+                <option value="INACTIVO" th:selected="${estadoEmpleados == 'INACTIVO'}">Inactivos</option>
+            </select>
+            <button type="submit" class="btn-secondary">Filtrar</button>
+        </form>
+
         <section class="table-wrap">
             <table>
                 <thead>
                 <tr>
                     <th>Empleado</th>
                     <th>Cargo</th>
-                    <th>Sucursal</th>
+                    <th>Préstamos asignados</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr data-id="1" data-nombre="Carlos Mendoza" data-rol="Gerente General" data-sucursal="Central" data-estado="Activo">
-                    <td>Carlos Mendoza</td>
-                    <td>Gerente General</td>
-                    <td>Central</td>
-                    <td><span class="badge ok">Activo</span></td>
-                    <td>
-                        <button type="button" class="link-btn view-btn">Ver ficha</button>
-                        <span class="action-divider">|</span>
-                        <button type="button" class="link-btn edit-btn">Editar</button>
-                        <span class="action-divider">|</span>
-                        <button type="button" class="link-btn delete-btn">Eliminar</button>
-                    </td>
+                <tr th:if="${#lists.isEmpty(empleados)}" class="empty-row">
+                    <td colspan="5">No hay empleados registrados.</td>
                 </tr>
-                <tr data-id="2" data-nombre="Rosa Chávez" data-rol="Cajero" data-sucursal="Central" data-estado="Activo">
-                    <td>Rosa Chávez</td>
-                    <td>Cajero</td>
-                    <td>Central</td>
-                    <td><span class="badge ok">Activo</span></td>
+                <tr th:each="empleado : ${empleados}"
+                    th:attr="data-id=${empleado.idEmpleado},
+                             data-nombre=${empleado.nombre},
+                             data-rol=${empleado.rol},
+                             data-estado=${empleado.estado}">
+                    <td th:text="${empleado.nombre}">Nombre</td>
+                    <td th:text="${empleado.rol}">Cargo</td>
+                    <td th:text="${empleado.prestamosAsignados}">0</td>
                     <td>
-                        <button type="button" class="link-btn view-btn">Ver ficha</button>
-                        <span class="action-divider">|</span>
-                        <button type="button" class="link-btn edit-btn">Editar</button>
-                        <span class="action-divider">|</span>
-                        <button type="button" class="link-btn delete-btn">Eliminar</button>
+                        <span class="badge"
+                              th:classappend="${empleado.estado != null and empleado.estado.equalsIgnoreCase('ACTIVO')} ? ' ok' : ' warn'"
+                              th:text="${empleado.estado}">ACTIVO</span>
                     </td>
-                </tr>
-                <tr data-id="3" data-nombre="Pedro Solis" data-rol="Analista Créditos" data-sucursal="Norte" data-estado="En capacitación">
-                    <td>Pedro Solis</td>
-                    <td>Analista Créditos</td>
-                    <td>Norte</td>
-                    <td><span class="badge warn">En capacitación</span></td>
                     <td>
                         <button type="button" class="link-btn view-btn">Ver ficha</button>
                         <span class="action-divider">|</span>
                         <button type="button" class="link-btn edit-btn">Editar</button>
                         <span class="action-divider">|</span>
-                        <button type="button" class="link-btn delete-btn">Eliminar</button>
+                        <button type="button" class="link-btn delete-btn">Inactivar</button>
                     </td>
                 </tr>
                 </tbody>
@@ -81,38 +76,30 @@
     </main>
 </div>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}"></div>
 
 <div class="modal-backdrop" id="employee-modal" aria-hidden="true">
     <div class="modal-card">
         <h2 class="modal-title" id="employee-modal-title">Nuevo Empleado</h2>
-        <p class="modal-subtitle">Formulario CRUD visual (sin backend)</p>
+        <p class="modal-subtitle">Formulario CRUD conectado a base de datos</p>
 
-        <form id="employee-form" class="crud-form">
-            <input type="hidden" id="employee-id">
-
+        <form id="employee-form" class="crud-form" method="post" th:action="@{/gerencia/empleados}">
             <div class="crud-grid">
                 <div class="crud-field">
                     <label for="employee-name">Nombre</label>
-                    <input id="employee-name" type="text" required maxlength="120">
+                    <input id="employee-name" name="nombre" type="text" required maxlength="120">
                 </div>
 
                 <div class="crud-field">
                     <label for="employee-role">Rol</label>
-                    <input id="employee-role" type="text" required maxlength="50">
-                </div>
-
-                <div class="crud-field">
-                    <label for="employee-branch">Sucursal</label>
-                    <input id="employee-branch" type="text" required maxlength="80">
+                    <input id="employee-role" name="rol" type="text" required maxlength="50">
                 </div>
 
                 <div class="crud-field">
                     <label for="employee-status">Estado</label>
-                    <select id="employee-status" required>
-                        <option>Activo</option>
-                        <option>En capacitación</option>
-                        <option>Inactivo</option>
+                    <select id="employee-status" name="estado" required>
+                        <option value="ACTIVO">ACTIVO</option>
+                        <option value="INACTIVO">INACTIVO</option>
                     </select>
                 </div>
             </div>
@@ -127,11 +114,12 @@
 
 <div class="modal-backdrop" id="employee-delete-modal" aria-hidden="true">
     <div class="modal-card modal-card-sm">
-        <h2 class="modal-title">Eliminar Empleado</h2>
-        <p class="modal-subtitle" id="employee-delete-text">¿Deseas eliminar este empleado?</p>
+        <h2 class="modal-title">Inactivar Empleado</h2>
+        <p class="modal-subtitle" id="employee-delete-text">¿Deseas inactivar este empleado?</p>
+        <form id="employee-delete-form" method="post"></form>
         <div class="modal-actions">
             <button type="button" class="btn-modal-secondary" id="employee-delete-cancel">Cancelar</button>
-            <button type="button" class="btn-modal-danger" id="employee-delete-confirm">Eliminar</button>
+            <button type="button" class="btn-modal-danger" id="employee-delete-confirm">Inactivar</button>
         </div>
     </div>
 </div>

@@ -38,44 +38,33 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td>PR-2025-001</td>
-                    <td>$10,000</td>
-                    <td>3%</td>
-                    <td>$365/mes</td>
-                    <td>$6,935.00</td>
-                    <td><span class="status-badge status-approved">Activo</span></td>
+                <tr th:if="${#lists.isEmpty(prestamos)}" class="empty-row">
+                    <td colspan="7">No hay préstamos registrados aún.</td>
+                </tr>
+                <tr th:each="prestamo : ${prestamos}">
+                    <td th:text="${'PR-' + prestamo.idPrestamo}">PR-0</td>
+                    <td th:text="${'$' + #numbers.formatDecimal(prestamo.monto, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                    <td th:text="${prestamo.interes + '%'}">0%</td>
+                    <td th:text="${'$' + #numbers.formatDecimal((prestamo.monto / prestamo.plazoMeses), 1, 'COMMA', 2, 'POINT') + '/mes'}">$0.00/mes</td>
+                    <td>N/D</td>
+                    <td>
+                        <span class="status-badge"
+                              th:classappend="${
+                                  prestamo.estado != null and (prestamo.estado.equalsIgnoreCase('APROBADO') or prestamo.estado.equalsIgnoreCase('ACTIVO'))
+                                  ? ' status-approved'
+                                  : (prestamo.estado != null and prestamo.estado.equalsIgnoreCase('RECHAZADO') ? ' status-rejected' : ' status-pending')
+                              }"
+                              th:text="${prestamo.estado}">
+                            Estado
+                        </span>
+                    </td>
                     <td class="actions-cell actions-col">
                         <div class="actions-group">
                             <button type="button" class="link-btn">Ver detalle</button>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>PR-2026-014</td>
-                    <td>$25,000</td>
-                    <td>3%</td>
-                    <td>$890/mes</td>
-                    <td>$25,000.00</td>
-                    <td><span class="status-badge status-pending">En revisión</span></td>
-                    <td class="actions-cell actions-col">
-                        <div class="actions-group">
-                            <button type="button" class="link-btn">Ver detalle</button>
-                            <span class="action-divider" aria-hidden="true">|</span>
-                            <button type="button" class="link-btn cancel-btn">Cancelar solicitud</button>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>PR-2026-003</td>
-                    <td>$35,000</td>
-                    <td>4%</td>
-                    <td>$1,200/mes</td>
-                    <td>$0.00</td>
-                    <td><span class="status-badge status-rejected">Rechazado</span></td>
-                    <td class="actions-cell actions-col">
-                        <div class="actions-group">
-                            <button type="button" class="link-btn">Ver motivo</button>
+                            <span class="action-divider" aria-hidden="true"
+                                  th:if="${prestamo.estado == null or prestamo.estado.equalsIgnoreCase('EN ESPERA') or prestamo.estado.equalsIgnoreCase('PENDIENTE')}">|</span>
+                            <button type="button" class="link-btn cancel-btn"
+                                    th:if="${prestamo.estado == null or prestamo.estado.equalsIgnoreCase('EN ESPERA') or prestamo.estado.equalsIgnoreCase('PENDIENTE')}">Cancelar solicitud</button>
                         </div>
                     </td>
                 </tr>

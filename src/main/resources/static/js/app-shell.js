@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const toast = document.getElementById("toast");
+    const autoMessage = toast?.dataset.autoMessage;
 
     window.showUiToast = (message) => {
         if (!toast) return;
@@ -9,4 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
             toast.classList.remove("show");
         }, 2000);
     };
+
+    if (autoMessage) {
+        window.showUiToast(autoMessage);
+    }
 });

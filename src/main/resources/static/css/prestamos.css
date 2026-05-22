@@ -59,6 +59,12 @@
     border-bottom: none;
 }
 
+.empty-row td {
+    text-align: center;
+    color: #6b7280;
+    padding: 1rem 0.75rem;
+}
+
 .status-badge {
     display: inline-flex;
     align-items: center;

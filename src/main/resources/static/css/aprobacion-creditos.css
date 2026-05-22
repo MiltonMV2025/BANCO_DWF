@@ -31,6 +31,12 @@ tbody tr:last-child td {
     border-bottom: none;
 }
 
+.empty-row td {
+    text-align: center;
+    color: #6b7280;
+    padding: 1rem 0.75rem;
+}
+
 .badge {
     display: inline-flex;
     align-items: center;
@@ -44,6 +50,11 @@ tbody tr:last-child td {
 .badge.pending {
     background: #eab308;
     color: #111;
+}
+
+.badge.approved {
+    background: #22c55e;
+    color: #fff;
 }
 
 .badge.rejected {
@@ -62,6 +73,14 @@ tbody tr:last-child td {
 
 .link-btn:hover {
     text-decoration: underline;
+}
+
+.action-cell {
+    white-space: nowrap;
+}
+
+.inline-form {
+    display: inline;
 }
 
 .approve {
@@ -101,8 +120,13 @@ tbody tr:last-child td {
     gap: 0.5rem;
 }
 
+.decision-actions form {
+    margin: 0;
+}
+
 .btn-reject,
 .btn-approve {
+    width: 100%;
     height: 40px;
     border-radius: 9px;
     font-weight: 700;

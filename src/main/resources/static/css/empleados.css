@@ -20,6 +20,33 @@
     cursor: pointer;
 }
 
+.btn-secondary {
+    height: 40px;
+    border-radius: 9px;
+    font-weight: 700;
+    padding: 0 1rem;
+    cursor: pointer;
+    border: 1px solid #111827;
+    background: #fff;
+    color: #111827;
+}
+
+.filters-row {
+    display: grid;
+    grid-template-columns: 1fr 220px auto;
+    gap: 0.55rem;
+    margin-bottom: 0.85rem;
+}
+
+.filters-row input,
+.filters-row select {
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    padding: 0 0.72rem;
+    background: #fff;
+}
+
 .table-wrap {
     border: 1px solid #e5e7eb;
     border-radius: 10px;
@@ -45,6 +72,12 @@ th {
 
 tbody tr:last-child td {
     border-bottom: none;
+}
+
+.empty-row td {
+    text-align: center;
+    color: #6b7280;
+    padding: 1rem 0.75rem;
 }
 
 .badge {
@@ -94,7 +127,7 @@ tbody tr:last-child td {
 
 .crud-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 0.65rem;
 }
 
@@ -134,6 +167,10 @@ tbody tr:last-child td {
 @media (max-width: 900px) {
     .header-row {
         flex-direction: column;
+    }
+
+    .filters-row {
+        grid-template-columns: 1fr;
     }
 
     .crud-grid {

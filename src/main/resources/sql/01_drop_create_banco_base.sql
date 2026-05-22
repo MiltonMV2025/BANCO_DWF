@@ -1,206 +1,425 @@
-/* ==========================================================
-   BANCO_DWF - SCRIPT BASE (DROP + CREATE)
-   SQL Server (ejecutar manualmente en sqlcmd/SSMS)
-   ========================================================== */
-
-/* ---------- DROP TRIGGERS ---------- */
-IF OBJECT_ID('dbo.TR_CUENTA_MAX_3', 'TR') IS NOT NULL
-    DROP TRIGGER dbo.TR_CUENTA_MAX_3;
+/****** Object:  Database [BancoDWF]    Script Date: 22/05/2026 08:38:46 a. m. ******/
+CREATE DATABASE [BancoDWF]  (EDITION = 'Standard', SERVICE_OBJECTIVE = 'S0', MAXSIZE = 250 GB) WITH CATALOG_COLLATION = SQL_Latin1_General_CP1_CI_AS, LEDGER = OFF;
 GO
-
-/* ---------- DROP TABLES (orden por FK) ---------- */
-IF OBJECT_ID('dbo.movimiento', 'U') IS NOT NULL
-    DROP TABLE dbo.movimiento;
+ALTER DATABASE [BancoDWF] SET COMPATIBILITY_LEVEL = 170
 GO
-
-IF OBJECT_ID('dbo.prestamo', 'U') IS NOT NULL
-    DROP TABLE dbo.prestamo;
+ALTER DATABASE [BancoDWF] SET ANSI_NULL_DEFAULT OFF 
 GO
-
-IF OBJECT_ID('dbo.cuenta', 'U') IS NOT NULL
-    DROP TABLE dbo.cuenta;
+ALTER DATABASE [BancoDWF] SET ANSI_NULLS OFF 
 GO
-
-IF OBJECT_ID('dbo.empleado', 'U') IS NOT NULL
-    DROP TABLE dbo.empleado;
+ALTER DATABASE [BancoDWF] SET ANSI_PADDING OFF 
 GO
-
-IF OBJECT_ID('dbo.cliente', 'U') IS NOT NULL
-    DROP TABLE dbo.cliente;
+ALTER DATABASE [BancoDWF] SET ANSI_WARNINGS OFF 
 GO
-
-IF OBJECT_ID('dbo.usuario_rol', 'U') IS NOT NULL
-    DROP TABLE dbo.usuario_rol;
+ALTER DATABASE [BancoDWF] SET ARITHABORT OFF 
 GO
-
-IF OBJECT_ID('dbo.usuario', 'U') IS NOT NULL
-    DROP TABLE dbo.usuario;
+ALTER DATABASE [BancoDWF] SET AUTO_SHRINK OFF 
 GO
-
-IF OBJECT_ID('dbo.rol', 'U') IS NOT NULL
-    DROP TABLE dbo.rol;
+ALTER DATABASE [BancoDWF] SET AUTO_UPDATE_STATISTICS ON 
 GO
-
-/* ---------- SEGURIDAD (LOGIN + ROLES) ---------- */
-CREATE TABLE dbo.rol (
-    id_rol INT IDENTITY(1,1) NOT NULL,
-    codigo VARCHAR(40) NOT NULL,
-    nombre VARCHAR(80) NOT NULL,
-    estado CHAR(1) NOT NULL CONSTRAINT DF_ROL_ESTADO DEFAULT 'A',
-    CONSTRAINT PK_ROL PRIMARY KEY (id_rol),
-    CONSTRAINT UQ_ROL_CODIGO UNIQUE (codigo),
-    CONSTRAINT CK_ROL_ESTADO CHECK (estado IN ('A','I'))
-);
+ALTER DATABASE [BancoDWF] SET CURSOR_CLOSE_ON_COMMIT OFF 
 GO
-
-CREATE TABLE dbo.usuario (
-    id_usuario INT IDENTITY(1,1) NOT NULL,
-    username VARCHAR(60) NOT NULL,
-    password_hash VARCHAR(100) NOT NULL,
-    estado CHAR(1) NOT NULL CONSTRAINT DF_USUARIO_ESTADO DEFAULT 'A',
-    CONSTRAINT PK_USUARIO PRIMARY KEY (id_usuario),
-    CONSTRAINT UQ_USUARIO_USERNAME UNIQUE (username),
-    CONSTRAINT CK_USUARIO_ESTADO CHECK (estado IN ('A','I'))
-);
+ALTER DATABASE [BancoDWF] SET CONCAT_NULL_YIELDS_NULL OFF 
 GO
-
-CREATE TABLE dbo.usuario_rol (
-    id_usuario INT NOT NULL,
-    id_rol INT NOT NULL,
-    CONSTRAINT PK_USUARIO_ROL PRIMARY KEY (id_usuario, id_rol),
-    CONSTRAINT FK_USUARIO_ROL_USUARIO FOREIGN KEY (id_usuario) REFERENCES dbo.usuario (id_usuario),
-    CONSTRAINT FK_USUARIO_ROL_ROL FOREIGN KEY (id_rol) REFERENCES dbo.rol (id_rol)
-);
+ALTER DATABASE [BancoDWF] SET NUMERIC_ROUNDABORT OFF 
 GO
-
-/* ---------- DOMINIO BANCARIO ---------- */
-CREATE TABLE dbo.cliente (
-    id INT IDENTITY(1,1) NOT NULL,
-    nombre VARCHAR(120) NOT NULL,
-    dui VARCHAR(10) NOT NULL,
-    salario DECIMAL(18,2) NOT NULL,
-    estado VARCHAR(20) NOT NULL,
-    CONSTRAINT PK_CLIENTE PRIMARY KEY (id),
-    CONSTRAINT UQ_CLIENTE_DUI UNIQUE (dui),
-    CONSTRAINT CK_CLIENTE_SALARIO_NONNEG CHECK (salario >= 0)
-);
+ALTER DATABASE [BancoDWF] SET QUOTED_IDENTIFIER OFF 
 GO
-
-CREATE TABLE dbo.empleado (
-    id_empleado INT IDENTITY(1,1) NOT NULL,
-    nombre VARCHAR(120) NOT NULL,
-    rol VARCHAR(50) NOT NULL,
-    estado VARCHAR(20) NOT NULL,
-    CONSTRAINT PK_EMPLEADO PRIMARY KEY (id_empleado)
-);
+ALTER DATABASE [BancoDWF] SET RECURSIVE_TRIGGERS OFF 
 GO
-
-CREATE TABLE dbo.cuenta (
-    id_cuenta INT IDENTITY(1,1) NOT NULL,
-    id_cliente INT NOT NULL,
-    numero_cuenta VARCHAR(20) NULL,
-    saldo DECIMAL(18,2) NOT NULL,
-    tipo VARCHAR(30) NOT NULL,
-    fecha_creacion DATE NOT NULL,
-    CONSTRAINT PK_CUENTA PRIMARY KEY (id_cuenta),
-    CONSTRAINT FK_CUENTA_CLIENTE FOREIGN KEY (id_cliente) REFERENCES dbo.cliente (id),
-    CONSTRAINT CK_CUENTA_SALDO_NONNEG CHECK (saldo >= 0)
-);
+ALTER DATABASE [BancoDWF] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
 GO
-
-CREATE TABLE dbo.prestamo (
-    id_prestamo INT IDENTITY(1,1) NOT NULL,
-    id_cliente INT NOT NULL,
-    id_empleado INT NOT NULL,
-    monto DECIMAL(18,2) NOT NULL,
-    interes DECIMAL(9,4) NOT NULL,
-    plazo_meses INT NOT NULL,
-    estado VARCHAR(20) NOT NULL,
-    cuota_mensual DECIMAL(18,2) NULL,
-    anios_pago DECIMAL(6,2) NULL,
-    CONSTRAINT PK_PRESTAMO PRIMARY KEY (id_prestamo),
-    CONSTRAINT FK_PRESTAMO_CLIENTE FOREIGN KEY (id_cliente) REFERENCES dbo.cliente (id),
-    CONSTRAINT FK_PRESTAMO_EMPLEADO FOREIGN KEY (id_empleado) REFERENCES dbo.empleado (id_empleado),
-    CONSTRAINT CK_PRESTAMO_MONTO_POSITIVE CHECK (monto > 0),
-    CONSTRAINT CK_PRESTAMO_INTERES_NONNEG CHECK (interes >= 0),
-    CONSTRAINT CK_PRESTAMO_PLAZO_POSITIVE CHECK (plazo_meses > 0)
-);
+ALTER DATABASE [BancoDWF] SET ALLOW_SNAPSHOT_ISOLATION ON 
 GO
-
-CREATE TABLE dbo.movimiento (
-    id_movimiento INT IDENTITY(1,1) NOT NULL,
-    id_cliente INT NOT NULL,
-    id_cuenta INT NOT NULL,
-    tipo VARCHAR(30) NOT NULL,
-    monto DECIMAL(18,2) NOT NULL,
-    fecha DATE NOT NULL,
-    CONSTRAINT PK_MOVIMIENTO PRIMARY KEY (id_movimiento),
-    CONSTRAINT FK_MOVIMIENTO_CLIENTE FOREIGN KEY (id_cliente) REFERENCES dbo.cliente (id),
-    CONSTRAINT FK_MOVIMIENTO_CUENTA FOREIGN KEY (id_cuenta) REFERENCES dbo.cuenta (id_cuenta),
-    CONSTRAINT CK_MOVIMIENTO_MONTO_POSITIVE CHECK (monto > 0)
-);
+ALTER DATABASE [BancoDWF] SET PARAMETERIZATION SIMPLE 
 GO
-
-/* ---------- INDEXES ---------- */
-CREATE INDEX IX_CLIENTE_ESTADO ON dbo.cliente (estado);
-CREATE INDEX IX_EMPLEADO_ESTADO ON dbo.empleado (estado);
-CREATE INDEX IX_CUENTA_ID_CLIENTE ON dbo.cuenta (id_cliente);
-CREATE INDEX IX_CUENTA_TIPO ON dbo.cuenta (tipo);
-CREATE UNIQUE INDEX IXU_CUENTA_NUMERO_CUENTA ON dbo.cuenta (numero_cuenta) WHERE numero_cuenta IS NOT NULL;
-CREATE INDEX IX_PRESTAMO_ID_CLIENTE ON dbo.prestamo (id_cliente);
-CREATE INDEX IX_PRESTAMO_ID_EMPLEADO ON dbo.prestamo (id_empleado);
-CREATE INDEX IX_PRESTAMO_ESTADO ON dbo.prestamo (estado);
-CREATE INDEX IX_MOVIMIENTO_ID_CLIENTE ON dbo.movimiento (id_cliente);
-CREATE INDEX IX_MOVIMIENTO_ID_CUENTA ON dbo.movimiento (id_cuenta);
-CREATE INDEX IX_MOVIMIENTO_FECHA ON dbo.movimiento (fecha);
+ALTER DATABASE [BancoDWF] SET READ_COMMITTED_SNAPSHOT ON 
 GO
-
-/* ---------- REGLA: MAX 3 CUENTAS ---------- */
-CREATE OR ALTER TRIGGER dbo.TR_CUENTA_MAX_3
-ON dbo.cuenta
-AFTER INSERT, UPDATE
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    IF EXISTS (
-        SELECT 1
-        FROM (
-            SELECT c.id_cliente, COUNT(*) AS total_cuentas
-            FROM dbo.cuenta c
-            INNER JOIN (SELECT DISTINCT id_cliente FROM inserted) i ON i.id_cliente = c.id_cliente
-            GROUP BY c.id_cliente
-        ) x
-        WHERE x.total_cuentas > 3
-    )
-    BEGIN
-        RAISERROR('Un cliente no puede tener mas de 3 cuentas.', 16, 1);
-        ROLLBACK TRANSACTION;
-        RETURN;
-    END
-END;
+ALTER DATABASE [BancoDWF] SET  MULTI_USER 
 GO
-
-/* ---------- DATOS INICIALES AUTH ---------- */
-INSERT INTO dbo.rol (codigo, nombre, estado) VALUES
-('ROLE_CLIENTE', 'Cliente', 'A'),
-('ROLE_DEPENDIENTE', 'Dependiente', 'A'),
-('ROLE_CAJERO', 'Cajero', 'A'),
-('ROLE_GERENTE_SUCURSAL', 'Gerente Sucursal', 'A'),
-('ROLE_GERENTE_GENERAL', 'Gerente General', 'A');
+ALTER DATABASE [BancoDWF] SET ENCRYPTION ON
 GO
-
-/* Usuario demo:
-   username: admin
-   password (BCrypt): password
-*/
-INSERT INTO dbo.usuario (username, password_hash, estado)
-VALUES ('admin', '$2a$10$yAcTKQhLmqSx2s8mPwh7veuWocdFL2uodTQzzkPVghzMGKRicrqIW', 'A');
+ALTER DATABASE [BancoDWF] SET QUERY_STORE = ON
 GO
-
-INSERT INTO dbo.usuario_rol (id_usuario, id_rol)
-SELECT u.id_usuario, r.id_rol
-FROM dbo.usuario u
-INNER JOIN dbo.rol r ON r.codigo = 'ROLE_GERENTE_GENERAL'
-WHERE u.username = 'admin';
+ALTER DATABASE [BancoDWF] SET QUERY_STORE (OPERATION_MODE = READ_WRITE, CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 30), DATA_FLUSH_INTERVAL_SECONDS = 900, INTERVAL_LENGTH_MINUTES = 60, MAX_STORAGE_SIZE_MB = 100, QUERY_CAPTURE_MODE = AUTO, SIZE_BASED_CLEANUP_MODE = AUTO, MAX_PLANS_PER_QUERY = 200, WAIT_STATS_CAPTURE_MODE = ON)
+GO
+/*** Los scripts de las configuraciones con ámbito de base de datos en Azure deben ejecutarse dentro de la conexión de base de datos de destino. ***/
+GO
+-- ALTER DATABASE SCOPED CONFIGURATION SET MAXDOP = 8;
+GO
+/****** Object:  Table [dbo].[cliente]    Script Date: 22/05/2026 08:38:46 a. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[cliente](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[nombre] [varchar](120) NOT NULL,
+	[dui] [varchar](10) NOT NULL,
+	[salario] [decimal](18, 2) NOT NULL,
+	[estado] [varchar](20) NOT NULL,
+ CONSTRAINT [PK_CLIENTE] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[cuenta]    Script Date: 22/05/2026 08:38:46 a. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[cuenta](
+	[id_cuenta] [int] IDENTITY(1,1) NOT NULL,
+	[id_cliente] [int] NOT NULL,
+	[numero_cuenta] [varchar](20) NULL,
+	[saldo] [decimal](18, 2) NOT NULL,
+	[tipo] [varchar](30) NOT NULL,
+	[fecha_creacion] [date] NOT NULL,
+ CONSTRAINT [PK_CUENTA] PRIMARY KEY CLUSTERED 
+(
+	[id_cuenta] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[empleado]    Script Date: 22/05/2026 08:38:46 a. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[empleado](
+	[id_empleado] [int] IDENTITY(1,1) NOT NULL,
+	[nombre] [varchar](120) NOT NULL,
+	[rol] [varchar](50) NOT NULL,
+	[estado] [varchar](20) NOT NULL,
+ CONSTRAINT [PK_EMPLEADO] PRIMARY KEY CLUSTERED 
+(
+	[id_empleado] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[flyway_schema_history]    Script Date: 22/05/2026 08:38:46 a. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[flyway_schema_history](
+	[installed_rank] [int] NOT NULL,
+	[version] [nvarchar](50) NULL,
+	[description] [nvarchar](200) NULL,
+	[type] [nvarchar](20) NOT NULL,
+	[script] [nvarchar](1000) NOT NULL,
+	[checksum] [int] NULL,
+	[installed_by] [nvarchar](100) NOT NULL,
+	[installed_on] [datetime] NOT NULL,
+	[execution_time] [int] NOT NULL,
+	[success] [bit] NOT NULL,
+ CONSTRAINT [flyway_schema_history_pk] PRIMARY KEY CLUSTERED 
+(
+	[installed_rank] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[movimiento]    Script Date: 22/05/2026 08:38:46 a. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[movimiento](
+	[id_movimiento] [int] IDENTITY(1,1) NOT NULL,
+	[id_cliente] [int] NOT NULL,
+	[id_cuenta] [int] NOT NULL,
+	[tipo] [varchar](30) NOT NULL,
+	[monto] [decimal](18, 2) NOT NULL,
+	[fecha] [date] NOT NULL,
+ CONSTRAINT [PK_MOVIMIENTO] PRIMARY KEY CLUSTERED 
+(
+	[id_movimiento] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[prestamo]    Script Date: 22/05/2026 08:38:46 a. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[prestamo](
+	[id_prestamo] [int] IDENTITY(1,1) NOT NULL,
+	[id_cliente] [int] NOT NULL,
+	[id_empleado] [int] NOT NULL,
+	[monto] [decimal](18, 2) NOT NULL,
+	[interes] [decimal](9, 4) NOT NULL,
+	[plazo_meses] [int] NOT NULL,
+	[estado] [varchar](20) NOT NULL,
+	[cuota_mensual] [decimal](18, 2) NULL,
+	[anios_pago] [decimal](6, 2) NULL,
+ CONSTRAINT [PK_PRESTAMO] PRIMARY KEY CLUSTERED 
+(
+	[id_prestamo] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[rol]    Script Date: 22/05/2026 08:38:46 a. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[rol](
+	[id_rol] [int] IDENTITY(1,1) NOT NULL,
+	[codigo] [varchar](40) NOT NULL,
+	[nombre] [varchar](80) NOT NULL,
+	[estado] [char](1) NOT NULL,
+ CONSTRAINT [PK_ROL] PRIMARY KEY CLUSTERED 
+(
+	[id_rol] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[usuario]    Script Date: 22/05/2026 08:38:46 a. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[usuario](
+	[id_usuario] [int] IDENTITY(1,1) NOT NULL,
+	[username] [varchar](60) NOT NULL,
+	[password_hash] [varchar](100) NOT NULL,
+	[estado] [char](1) NOT NULL,
+ CONSTRAINT [PK_USUARIO] PRIMARY KEY CLUSTERED 
+(
+	[id_usuario] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[usuario_rol]    Script Date: 22/05/2026 08:38:46 a. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[usuario_rol](
+	[id_usuario] [int] NOT NULL,
+	[id_rol] [int] NOT NULL,
+ CONSTRAINT [PK_USUARIO_ROL] PRIMARY KEY CLUSTERED 
+(
+	[id_usuario] ASC,
+	[id_rol] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET IDENTITY_INSERT [dbo].[cliente] ON 
+GO
+INSERT [dbo].[cliente] ([id], [nombre], [dui], [salario], [estado]) VALUES (1, N'Cliente Demo', N'07891234-5', CAST(850.00 AS Decimal(18, 2)), N'Activo')
+GO
+SET IDENTITY_INSERT [dbo].[cliente] OFF
+GO
+INSERT [dbo].[flyway_schema_history] ([installed_rank], [version], [description], [type], [script], [checksum], [installed_by], [installed_on], [execution_time], [success]) VALUES (1, N'1', N'init', N'SQL', N'V1__init.sql', -1931961350, N'adminuser', CAST(N'2026-04-23T02:57:22.147' AS DateTime), 1102, 1)
+GO
+SET IDENTITY_INSERT [dbo].[rol] ON 
+GO
+INSERT [dbo].[rol] ([id_rol], [codigo], [nombre], [estado]) VALUES (1, N'ROLE_CLIENTE', N'Cliente', N'A')
+GO
+INSERT [dbo].[rol] ([id_rol], [codigo], [nombre], [estado]) VALUES (2, N'ROLE_DEPENDIENTE', N'Dependiente', N'A')
+GO
+INSERT [dbo].[rol] ([id_rol], [codigo], [nombre], [estado]) VALUES (3, N'ROLE_CAJERO', N'Cajero', N'A')
+GO
+INSERT [dbo].[rol] ([id_rol], [codigo], [nombre], [estado]) VALUES (4, N'ROLE_GERENTE_SUCURSAL', N'Gerente Sucursal', N'A')
+GO
+INSERT [dbo].[rol] ([id_rol], [codigo], [nombre], [estado]) VALUES (5, N'ROLE_GERENTE_GENERAL', N'Gerente General', N'A')
+GO
+SET IDENTITY_INSERT [dbo].[rol] OFF
+GO
+SET IDENTITY_INSERT [dbo].[usuario] ON 
+GO
+INSERT [dbo].[usuario] ([id_usuario], [username], [password_hash], [estado]) VALUES (1, N'admin', N'$2a$10$yAcTKQhLmqSx2s8mPwh7veuWocdFL2uodTQzzkPVghzMGKRicrqIW', N'A')
+GO
+INSERT [dbo].[usuario] ([id_usuario], [username], [password_hash], [estado]) VALUES (2, N'cliente_demo', N'$2a$10$yAcTKQhLmqSx2s8mPwh7veuWocdFL2uodTQzzkPVghzMGKRicrqIW', N'A')
+GO
+SET IDENTITY_INSERT [dbo].[usuario] OFF
+GO
+INSERT [dbo].[usuario_rol] ([id_usuario], [id_rol]) VALUES (1, 5)
+GO
+INSERT [dbo].[usuario_rol] ([id_usuario], [id_rol]) VALUES (2, 1)
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UQ_CLIENTE_DUI]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+ALTER TABLE [dbo].[cliente] ADD  CONSTRAINT [UQ_CLIENTE_DUI] UNIQUE NONCLUSTERED 
+(
+	[dui] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_CLIENTE_ESTADO]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+CREATE NONCLUSTERED INDEX [IX_CLIENTE_ESTADO] ON [dbo].[cliente]
+(
+	[estado] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_CUENTA_ID_CLIENTE]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+CREATE NONCLUSTERED INDEX [IX_CUENTA_ID_CLIENTE] ON [dbo].[cuenta]
+(
+	[id_cliente] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_CUENTA_TIPO]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+CREATE NONCLUSTERED INDEX [IX_CUENTA_TIPO] ON [dbo].[cuenta]
+(
+	[tipo] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IXU_CUENTA_NUMERO_CUENTA]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+CREATE UNIQUE NONCLUSTERED INDEX [IXU_CUENTA_NUMERO_CUENTA] ON [dbo].[cuenta]
+(
+	[numero_cuenta] ASC
+)
+WHERE ([numero_cuenta] IS NOT NULL)
+WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_EMPLEADO_ESTADO]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+CREATE NONCLUSTERED INDEX [IX_EMPLEADO_ESTADO] ON [dbo].[empleado]
+(
+	[estado] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [flyway_schema_history_s_idx]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+CREATE NONCLUSTERED INDEX [flyway_schema_history_s_idx] ON [dbo].[flyway_schema_history]
+(
+	[success] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_MOVIMIENTO_FECHA]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+CREATE NONCLUSTERED INDEX [IX_MOVIMIENTO_FECHA] ON [dbo].[movimiento]
+(
+	[fecha] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_MOVIMIENTO_ID_CLIENTE]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+CREATE NONCLUSTERED INDEX [IX_MOVIMIENTO_ID_CLIENTE] ON [dbo].[movimiento]
+(
+	[id_cliente] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_MOVIMIENTO_ID_CUENTA]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+CREATE NONCLUSTERED INDEX [IX_MOVIMIENTO_ID_CUENTA] ON [dbo].[movimiento]
+(
+	[id_cuenta] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_PRESTAMO_ESTADO]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+CREATE NONCLUSTERED INDEX [IX_PRESTAMO_ESTADO] ON [dbo].[prestamo]
+(
+	[estado] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_PRESTAMO_ID_CLIENTE]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+CREATE NONCLUSTERED INDEX [IX_PRESTAMO_ID_CLIENTE] ON [dbo].[prestamo]
+(
+	[id_cliente] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_PRESTAMO_ID_EMPLEADO]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+CREATE NONCLUSTERED INDEX [IX_PRESTAMO_ID_EMPLEADO] ON [dbo].[prestamo]
+(
+	[id_empleado] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UQ_ROL_CODIGO]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+ALTER TABLE [dbo].[rol] ADD  CONSTRAINT [UQ_ROL_CODIGO] UNIQUE NONCLUSTERED 
+(
+	[codigo] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UQ_USUARIO_USERNAME]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+ALTER TABLE [dbo].[usuario] ADD  CONSTRAINT [UQ_USUARIO_USERNAME] UNIQUE NONCLUSTERED 
+(
+	[username] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[flyway_schema_history] ADD  DEFAULT (getdate()) FOR [installed_on]
+GO
+ALTER TABLE [dbo].[rol] ADD  CONSTRAINT [DF_ROL_ESTADO]  DEFAULT ('A') FOR [estado]
+GO
+ALTER TABLE [dbo].[usuario] ADD  CONSTRAINT [DF_USUARIO_ESTADO]  DEFAULT ('A') FOR [estado]
+GO
+ALTER TABLE [dbo].[cuenta]  WITH CHECK ADD  CONSTRAINT [FK_CUENTA_CLIENTE] FOREIGN KEY([id_cliente])
+REFERENCES [dbo].[cliente] ([id])
+GO
+ALTER TABLE [dbo].[cuenta] CHECK CONSTRAINT [FK_CUENTA_CLIENTE]
+GO
+ALTER TABLE [dbo].[movimiento]  WITH CHECK ADD  CONSTRAINT [FK_MOVIMIENTO_CLIENTE] FOREIGN KEY([id_cliente])
+REFERENCES [dbo].[cliente] ([id])
+GO
+ALTER TABLE [dbo].[movimiento] CHECK CONSTRAINT [FK_MOVIMIENTO_CLIENTE]
+GO
+ALTER TABLE [dbo].[movimiento]  WITH CHECK ADD  CONSTRAINT [FK_MOVIMIENTO_CUENTA] FOREIGN KEY([id_cuenta])
+REFERENCES [dbo].[cuenta] ([id_cuenta])
+GO
+ALTER TABLE [dbo].[movimiento] CHECK CONSTRAINT [FK_MOVIMIENTO_CUENTA]
+GO
+ALTER TABLE [dbo].[prestamo]  WITH CHECK ADD  CONSTRAINT [FK_PRESTAMO_CLIENTE] FOREIGN KEY([id_cliente])
+REFERENCES [dbo].[cliente] ([id])
+GO
+ALTER TABLE [dbo].[prestamo] CHECK CONSTRAINT [FK_PRESTAMO_CLIENTE]
+GO
+ALTER TABLE [dbo].[prestamo]  WITH CHECK ADD  CONSTRAINT [FK_PRESTAMO_EMPLEADO] FOREIGN KEY([id_empleado])
+REFERENCES [dbo].[empleado] ([id_empleado])
+GO
+ALTER TABLE [dbo].[prestamo] CHECK CONSTRAINT [FK_PRESTAMO_EMPLEADO]
+GO
+ALTER TABLE [dbo].[usuario_rol]  WITH CHECK ADD  CONSTRAINT [FK_USUARIO_ROL_ROL] FOREIGN KEY([id_rol])
+REFERENCES [dbo].[rol] ([id_rol])
+GO
+ALTER TABLE [dbo].[usuario_rol] CHECK CONSTRAINT [FK_USUARIO_ROL_ROL]
+GO
+ALTER TABLE [dbo].[usuario_rol]  WITH CHECK ADD  CONSTRAINT [FK_USUARIO_ROL_USUARIO] FOREIGN KEY([id_usuario])
+REFERENCES [dbo].[usuario] ([id_usuario])
+GO
+ALTER TABLE [dbo].[usuario_rol] CHECK CONSTRAINT [FK_USUARIO_ROL_USUARIO]
+GO
+ALTER TABLE [dbo].[cliente]  WITH CHECK ADD  CONSTRAINT [CK_CLIENTE_SALARIO_NONNEG] CHECK  (([salario]>=(0)))
+GO
+ALTER TABLE [dbo].[cliente] CHECK CONSTRAINT [CK_CLIENTE_SALARIO_NONNEG]
+GO
+ALTER TABLE [dbo].[cuenta]  WITH CHECK ADD  CONSTRAINT [CK_CUENTA_SALDO_NONNEG] CHECK  (([saldo]>=(0)))
+GO
+ALTER TABLE [dbo].[cuenta] CHECK CONSTRAINT [CK_CUENTA_SALDO_NONNEG]
+GO
+ALTER TABLE [dbo].[movimiento]  WITH CHECK ADD  CONSTRAINT [CK_MOVIMIENTO_MONTO_POSITIVE] CHECK  (([monto]>(0)))
+GO
+ALTER TABLE [dbo].[movimiento] CHECK CONSTRAINT [CK_MOVIMIENTO_MONTO_POSITIVE]
+GO
+ALTER TABLE [dbo].[prestamo]  WITH CHECK ADD  CONSTRAINT [CK_PRESTAMO_INTERES_NONNEG] CHECK  (([interes]>=(0)))
+GO
+ALTER TABLE [dbo].[prestamo] CHECK CONSTRAINT [CK_PRESTAMO_INTERES_NONNEG]
+GO
+ALTER TABLE [dbo].[prestamo]  WITH CHECK ADD  CONSTRAINT [CK_PRESTAMO_MONTO_POSITIVE] CHECK  (([monto]>(0)))
+GO
+ALTER TABLE [dbo].[prestamo] CHECK CONSTRAINT [CK_PRESTAMO_MONTO_POSITIVE]
+GO
+ALTER TABLE [dbo].[prestamo]  WITH CHECK ADD  CONSTRAINT [CK_PRESTAMO_PLAZO_POSITIVE] CHECK  (([plazo_meses]>(0)))
+GO
+ALTER TABLE [dbo].[prestamo] CHECK CONSTRAINT [CK_PRESTAMO_PLAZO_POSITIVE]
+GO
+ALTER TABLE [dbo].[rol]  WITH CHECK ADD  CONSTRAINT [CK_ROL_ESTADO] CHECK  (([estado]='I' OR [estado]='A'))
+GO
+ALTER TABLE [dbo].[rol] CHECK CONSTRAINT [CK_ROL_ESTADO]
+GO
+ALTER TABLE [dbo].[usuario]  WITH CHECK ADD  CONSTRAINT [CK_USUARIO_ESTADO] CHECK  (([estado]='I' OR [estado]='A'))
+GO
+ALTER TABLE [dbo].[usuario] CHECK CONSTRAINT [CK_USUARIO_ESTADO]
+GO
+ALTER DATABASE [BancoDWF] SET  READ_WRITE 
 GO

@@ -47,16 +47,10 @@
 ## 4) Shell y navegación
 
 - Header y sidebar siempre compartidos.
-- Menú unificado visible para todos en esta fase:
-  - Dashboard
-  - Movimientos
-  - Transacciones
-  - Mis Préstamos
-  - Clientes
-  - Empleados
-  - Aprobación Créditos
+- Menú condicionado por rol:
+  - Usuario: Dashboard, Movimientos, Transacciones, Mis Préstamos
+  - Gerencia: Clientes, Empleados, Aprobación Créditos
 - **Configuración removida** de UX actual.
-- Nota: en un refactor posterior se aplicará visibilidad por rol.
 
 ## 5) Reglas de UX separada
 
@@ -69,23 +63,29 @@
 - Gestiona empleados.
 - Revisa y decide solicitudes en Aprobación de Créditos.
 
-### Visibilidad temporal
-- En esta fase TODAS las rutas se muestran en el sidebar.
-- En refactor posterior se aplicará visibilidad por rol/permisos.
+### Visibilidad por rol (actual)
+- Sidebar usuario visible para: `ROLE_CLIENTE`, `ROLE_CAJERO`, `ROLE_DEPENDIENTE`.
+- Sidebar gerencia visible para: `ROLE_GERENTE_SUCURSAL`, `ROLE_GERENTE_GENERAL`.
+- Si el usuario autenticado no coincide con las reglas anteriores, se aplica fallback visual de menú usuario.
 
 ## 6) Patrones de componentes
 
 - Inputs/selects: 38px a 44px, radio 8px-10px.
 - Fechas en filtros: `input[type="date"]`.
 - Botón primario: fondo `--accent`, texto oscuro, peso 700.
-- Toast: feedback visual sin backend.
-- Modales CRUD frontend (sin backend) para altas/ediciones/eliminaciones:
+- Toast: feedback visual para confirmaciones y errores del backend.
+- Modales CRUD conectados a backend para altas/ediciones/inactivaciones:
   - Clientes: `nombre`, `dui`, `salario`, `estado`
-  - Empleados: `nombre`, `rol`, `estado` (+ sucursal visual para la UI)
+  - Empleados: `nombre`, `rol`, `estado`
 - Badges estado:
   - verde = aprobado/activo
   - amarillo = en espera
   - rojo = rechazado
+- Transferencias:
+  - Búsqueda por DUI
+  - Selección de cuenta real
+  - Depósito/Retiro persiste `movimiento` y actualiza `saldo`
+  - Debe mostrar empty state si no hay cliente, cuentas o movimientos
 
 ## 7) Rutas frontend
 
@@ -115,4 +115,4 @@
 - [ ] Respeta tokens y tipografía.
 - [ ] Mantiene separación usuario vs gerente.
 - [ ] Mantiene pantalla separada por archivo.
-- [ ] Actualiza `design.md` y `FRONTEND_TODO.md` si cambia el flujo.
+- [ ] Actualiza `design.md` si cambia el flujo.

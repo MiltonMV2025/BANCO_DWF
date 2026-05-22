@@ -24,15 +24,16 @@
             </button>
         </section>
 
-        <section class="filters-row">
-            <input type="text" id="search-client" placeholder="Buscar por nombre, DUI o cuenta">
-            <select id="status-filter">
-                <option>Todos los estados</option>
-                <option>Activos</option>
-                <option>Inactivos</option>
+        <form class="filters-row" method="get" th:action="@{/gerencia/clientes}">
+            <input type="text" id="search-client" name="q" th:value="${qClientes}" placeholder="Buscar por nombre o DUI">
+            <select id="status-filter" name="estado">
+                <option value="" th:selected="${estadoClientes == null or estadoClientes.isEmpty()}">Todos los estados</option>
+                <option value="ACTIVO" th:selected="${estadoClientes == 'ACTIVO'}">Activos</option>
+                <option value="INACTIVO" th:selected="${estadoClientes == 'INACTIVO'}">Inactivos</option>
+                <option value="MONITOREO" th:selected="${estadoClientes == 'MONITOREO'}">Monitoreo</option>
             </select>
-            <button type="button" class="btn-secondary" id="apply-filter">Filtrar</button>
-        </section>
+            <button type="submit" class="btn-secondary">Filtrar</button>
+        </form>
 
         <section class="table-wrap">
             <table>
@@ -47,46 +48,30 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr data-id="1" data-nombre="Ana García" data-dui="01234567-8" data-salario="1200.00" data-estado="Activo">
-                    <td>Ana García</td>
-                    <td>01234567-8</td>
-                    <td>2</td>
-                    <td>$12,850.00</td>
-                    <td><span class="badge ok">Activo</span></td>
-                    <td>
-                        <button type="button" class="link-btn view-btn">Ver perfil</button>
-                        <span class="action-divider">|</span>
-                        <button type="button" class="link-btn edit-btn">Editar</button>
-                        <span class="action-divider">|</span>
-                        <button type="button" class="link-btn delete-btn">Eliminar</button>
-                    </td>
+                <tr th:if="${#lists.isEmpty(clientes)}" class="empty-row">
+                    <td colspan="6">No hay clientes registrados.</td>
                 </tr>
-                <tr data-id="2" data-nombre="Luis Ramos" data-dui="02345678-9" data-salario="900.00" data-estado="Activo">
-                    <td>Luis Ramos</td>
-                    <td>02345678-9</td>
-                    <td>1</td>
-                    <td>$2,340.00</td>
-                    <td><span class="badge ok">Activo</span></td>
+                <tr th:each="cliente : ${clientes}"
+                    th:attr="data-id=${cliente.id},
+                             data-nombre=${cliente.nombre},
+                             data-dui=${cliente.dui},
+                             data-salario=${cliente.salario},
+                             data-estado=${cliente.estado}">
+                    <td th:text="${cliente.nombre}">Nombre</td>
+                    <td th:text="${cliente.dui}">00000000-0</td>
+                    <td th:text="${cliente.totalCuentas}">0</td>
+                    <td th:text="${'$' + #numbers.formatDecimal(cliente.saldoTotal, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
                     <td>
-                        <button type="button" class="link-btn view-btn">Ver perfil</button>
-                        <span class="action-divider">|</span>
-                        <button type="button" class="link-btn edit-btn">Editar</button>
-                        <span class="action-divider">|</span>
-                        <button type="button" class="link-btn delete-btn">Eliminar</button>
+                        <span class="badge"
+                              th:classappend="${cliente.estado != null and cliente.estado.equalsIgnoreCase('ACTIVO')} ? ' ok' : ' warn'"
+                              th:text="${cliente.estado}">ACTIVO</span>
                     </td>
-                </tr>
-                <tr data-id="3" data-nombre="María López" data-dui="03456789-0" data-salario="2500.00" data-estado="Monitoreo">
-                    <td>María López</td>
-                    <td>03456789-0</td>
-                    <td>3</td>
-                    <td>$41,120.00</td>
-                    <td><span class="badge warn">Monitoreo</span></td>
                     <td>
                         <button type="button" class="link-btn view-btn">Ver perfil</button>
                         <span class="action-divider">|</span>
                         <button type="button" class="link-btn edit-btn">Editar</button>
                         <span class="action-divider">|</span>
-                        <button type="button" class="link-btn delete-btn">Eliminar</button>
+                        <button type="button" class="link-btn delete-btn">Inactivar</button>
                     </td>
                 </tr>
                 </tbody>
@@ -95,38 +80,36 @@
     </main>
 </div>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}"></div>
 
 <div class="modal-backdrop" id="client-modal" aria-hidden="true">
     <div class="modal-card">
         <h2 class="modal-title" id="client-modal-title">Nuevo Cliente</h2>
-        <p class="modal-subtitle">Formulario CRUD visual (sin backend)</p>
+        <p class="modal-subtitle">Formulario CRUD conectado a base de datos</p>
 
-        <form id="client-form" class="crud-form">
-            <input type="hidden" id="client-id">
-
+        <form id="client-form" class="crud-form" method="post" th:action="@{/gerencia/clientes}">
             <div class="crud-grid">
                 <div class="crud-field">
                     <label for="client-name">Nombre</label>
-                    <input id="client-name" type="text" required maxlength="120">
+                    <input id="client-name" name="nombre" type="text" required maxlength="120">
                 </div>
 
                 <div class="crud-field">
                     <label for="client-dui">DUI</label>
-                    <input id="client-dui" type="text" required maxlength="10" placeholder="00000000-0">
+                    <input id="client-dui" name="dui" type="text" required maxlength="10" placeholder="00000000-0">
                 </div>
 
                 <div class="crud-field">
                     <label for="client-salary">Salario</label>
-                    <input id="client-salary" type="number" min="0" step="0.01" required>
+                    <input id="client-salary" name="salario" type="number" min="0" step="0.01" required>
                 </div>
 
                 <div class="crud-field">
                     <label for="client-status">Estado</label>
-                    <select id="client-status" required>
-                        <option>Activo</option>
-                        <option>Monitoreo</option>
-                        <option>Inactivo</option>
+                    <select id="client-status" name="estado" required>
+                        <option value="ACTIVO">ACTIVO</option>
+                        <option value="MONITOREO">MONITOREO</option>
+                        <option value="INACTIVO">INACTIVO</option>
                     </select>
                 </div>
             </div>
@@ -141,11 +124,12 @@
 
 <div class="modal-backdrop" id="client-delete-modal" aria-hidden="true">
     <div class="modal-card modal-card-sm">
-        <h2 class="modal-title">Eliminar Cliente</h2>
-        <p class="modal-subtitle" id="client-delete-text">¿Deseas eliminar este cliente?</p>
+        <h2 class="modal-title">Inactivar Cliente</h2>
+        <p class="modal-subtitle" id="client-delete-text">¿Deseas inactivar este cliente?</p>
+        <form id="client-delete-form" method="post"></form>
         <div class="modal-actions">
             <button type="button" class="btn-modal-secondary" id="client-delete-cancel">Cancelar</button>
-            <button type="button" class="btn-modal-danger" id="client-delete-confirm">Eliminar</button>
+            <button type="button" class="btn-modal-danger" id="client-delete-confirm">Inactivar</button>
         </div>
     </div>
 </div>

@@ -16,30 +16,34 @@
         <h1>Movimientos</h1>
         <p class="subtitle">Historial de transacciones de tus cuentas</p>
 
-        <div class="movements-filters">
+        <form class="movements-filters" method="get" th:action="@{/movimientos}">
             <div class="filter-field">
                 <label for="movement-account">Seleccionar cuenta</label>
-                <select id="movement-account">
-                    <option>Cuenta Ahorros *4821</option>
-                    <option>Cuenta Corriente *7392</option>
-                    <option>Cuenta Ahorros *2156</option>
+                <select id="movement-account" name="cuentaId">
+                    <option th:if="${#lists.isEmpty(cuentasMovimiento)}" value="">Sin cuentas</option>
+                    <option th:each="cuenta : ${cuentasMovimiento}"
+                            th:value="${cuenta.idCuenta}"
+                            th:selected="${cuentaSeleccionadaId != null and cuenta.idCuenta == cuentaSeleccionadaId}"
+                            th:text="${'**** ' + cuenta.idCuenta + ' — ' + cuenta.tipo}">
+                        Cuenta
+                    </option>
                 </select>
             </div>
 
             <div class="filter-field">
                 <label for="from-date">Desde</label>
-                <input id="from-date" type="date" value="2025-03-01">
+                <input id="from-date" name="desde" type="date" th:value="${desdeMovimiento}">
             </div>
 
             <div class="filter-field">
                 <label for="to-date">Hasta</label>
-                <input id="to-date" type="date" value="2025-04-05">
+                <input id="to-date" name="hasta" type="date" th:value="${hastaMovimiento}">
             </div>
 
             <div class="filter-field filter-action">
-                <button type="button" class="btn-accent" id="apply-filter">Filtrar</button>
+                <button type="submit" class="btn-accent" id="apply-filter">Filtrar</button>
             </div>
-        </div>
+        </form>
 
         <div class="movements-table-wrap">
             <table class="movements-table">
@@ -52,57 +56,26 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td>05/04/2025</td>
-                    <td>Depósito en efectivo</td>
-                    <td>Depósito</td>
-                    <td class="positive amount-col">+$500.00</td>
+                <tr th:if="${#lists.isEmpty(movimientos)}">
+                    <td colspan="4" class="empty-inline">No hay movimientos para los filtros seleccionados.</td>
                 </tr>
-                <tr>
-                    <td>04/04/2025</td>
-                    <td>Pago de servicio ANDA</td>
-                    <td>Retiro</td>
-                    <td class="negative amount-col">-$45.00</td>
-                </tr>
-                <tr>
-                    <td>03/04/2025</td>
-                    <td>Transferencia recibida</td>
-                    <td>Depósito</td>
-                    <td class="positive amount-col">+$200.00</td>
-                </tr>
-                <tr>
-                    <td>02/04/2025</td>
-                    <td>Retiro cajero automático</td>
-                    <td>Retiro</td>
-                    <td class="negative amount-col">-$100.00</td>
-                </tr>
-                <tr>
-                    <td>01/04/2025</td>
-                    <td>Depósito nómina</td>
-                    <td>Depósito</td>
-                    <td class="positive amount-col">+$1250.00</td>
-                </tr>
-                <tr>
-                    <td>31/03/2025</td>
-                    <td>Transferencia enviada</td>
-                    <td>Retiro</td>
-                    <td class="negative amount-col">-$75.00</td>
+                <tr th:each="mov : ${movimientos}">
+                    <td th:text="${#temporals.format(mov.fecha, 'dd/MM/yyyy')}">01/01/2026</td>
+                    <td th:text="${mov.tipo == 'RETIRO' ? 'Retiro de cuenta' : 'Depósito en cuenta'}">Descripción</td>
+                    <td th:text="${mov.tipo == 'RETIRO' ? 'Retiro' : 'Depósito'}">Depósito</td>
+                    <td class="amount-col"
+                        th:classappend="${mov.tipo == 'RETIRO'} ? 'negative' : 'positive'"
+                        th:text="${(mov.tipo == 'RETIRO' ? '-' : '+') + '$' + #numbers.formatDecimal(mov.monto, 1, 'COMMA', 2, 'POINT')}">
+                        +$0.00
+                    </td>
                 </tr>
                 </tbody>
             </table>
         </div>
-
-        <div class="pagination">
-            <button type="button" class="page-btn page-arrow" data-page="prev">&#8249;</button>
-            <button type="button" class="page-btn active" data-page="1">1</button>
-            <button type="button" class="page-btn" data-page="2">2</button>
-            <button type="button" class="page-btn" data-page="3">3</button>
-            <button type="button" class="page-btn page-arrow" data-page="next">&#8250;</button>
-        </div>
     </main>
 </div>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}"></div>
 
 <script th:src="@{/js/app-shell.js}"></script>
 <script th:src="@{/js/movimientos.js}"></script>

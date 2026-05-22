@@ -13,4 +13,12 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Integer>
     List<Movimiento> findAllByCuenta_IdCuenta(Integer idCuenta);
 
     List<Movimiento> findAllByFechaBetween(LocalDate fechaInicio, LocalDate fechaFin);
+
+    List<Movimiento> findTop5ByCuenta_IdCuentaOrderByFechaDescIdMovimientoDesc(Integer idCuenta);
+
+    List<Movimiento> findAllByCuenta_IdCuentaAndFechaBetweenOrderByFechaDescIdMovimientoDesc(
+            Integer idCuenta,
+            LocalDate fechaInicio,
+            LocalDate fechaFin
+    );
 }

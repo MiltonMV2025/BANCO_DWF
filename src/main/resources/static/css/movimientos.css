@@ -108,6 +108,12 @@
     font-weight: 700;
 }
 
+.empty-inline {
+    text-align: center !important;
+    color: #6b7280;
+    padding: 1rem 0.75rem !important;
+}
+
 .pagination {
     margin-top: 1.2rem;
     display: flex;

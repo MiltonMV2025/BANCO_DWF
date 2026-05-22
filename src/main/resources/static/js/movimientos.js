@@ -1,23 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const applyFilter = document.getElementById("apply-filter");
-    const pageButtons = document.querySelectorAll(".page-btn");
+    const fromDate = document.getElementById("from-date");
+    const toDate = document.getElementById("to-date");
 
-    if (applyFilter) {
-        applyFilter.addEventListener("click", () => {
-            window.showUiToast?.("Filtro aplicado (modo visual, sin backend).");
-        });
-    }
+    if (!fromDate || !toDate) return;
 
-    pageButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-            if (button.dataset.page === "prev" || button.dataset.page === "next") {
-                window.showUiToast?.("Paginación visual habilitada.");
-                return;
-            }
-
-            pageButtons.forEach((node) => node.classList.remove("active"));
-            button.classList.add("active");
-            window.showUiToast?.(`Página ${button.dataset.page} seleccionada.`);
-        });
+    toDate.addEventListener("change", () => {
+        if (fromDate.value && toDate.value && fromDate.value > toDate.value) {
+            window.showUiToast?.("La fecha 'Desde' no puede ser mayor que 'Hasta'.");
+        }
     });
 });

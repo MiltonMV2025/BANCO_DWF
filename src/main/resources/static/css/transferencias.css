@@ -85,6 +85,10 @@
     padding: 0.9rem;
 }
 
+.client-empty-state {
+    color: #6b7280;
+}
+
 .client-found-title {
     color: #15803d;
     font-weight: 700;
@@ -252,6 +256,41 @@
     color: #b45309;
     font-style: italic;
     font-size: 0.85rem;
+}
+
+.recent-movements {
+    margin-top: 0.6rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #fff;
+    padding: 0.7rem;
+}
+
+.recent-movements h3 {
+    font-size: 1rem;
+    margin-bottom: 0.45rem;
+}
+
+.recent-movements table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.recent-movements th,
+.recent-movements td {
+    text-align: left;
+    padding: 0.45rem 0.35rem;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.88rem;
+}
+
+.recent-movements tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.empty-inline {
+    color: #6b7280;
+    font-size: 0.9rem;
 }
 
 @media (max-width: 1220px) {

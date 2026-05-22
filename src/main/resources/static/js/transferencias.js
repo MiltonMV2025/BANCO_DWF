@@ -8,9 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const summaryTotal = document.getElementById("summary-total");
     const accountSelect = document.getElementById("account-select");
     const summaryAccount = document.getElementById("summary-account");
-    const searchClient = document.getElementById("search-client");
-
-    let currentOperation = "Deposito";
+    const operationInput = document.getElementById("operation-type-input");
+    const amountHiddenInput = document.getElementById("operation-amount-input");
+    const operationForm = document.getElementById("transfer-operation-form");
 
     const formatCurrency = (value) => {
         const number = Number(value || 0);
@@ -18,50 +18,60 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const syncAmounts = () => {
-        const formatted = formatCurrency(amountInput?.value);
+        const value = amountInput?.value ?? 0;
+        if (amountHiddenInput) amountHiddenInput.value = value;
+        const formatted = formatCurrency(value);
         if (summaryAmount) summaryAmount.textContent = formatted;
         if (summaryTotal) summaryTotal.textContent = formatted;
     };
 
+    const updateOperationUi = (operationType) => {
+        const isDeposito = operationType === "DEPOSITO";
+        if (operationInput) operationInput.value = operationType;
+
+        operationButtons.forEach((button) => {
+            button.classList.toggle("active", button.dataset.type === operationType);
+        });
+
+        if (amountLabel) {
+            amountLabel.textContent = isDeposito ? "Monto a depositar" : "Monto a retirar";
+        }
+
+        if (confirmButton) {
+            confirmButton.innerHTML = `Confirmar <span>${isDeposito ? "Depósito" : "Retiro"}</span>`;
+        }
+
+        if (summaryType) {
+            summaryType.textContent = isDeposito ? "Depósito" : "Retiro";
+        }
+    };
+
     operationButtons.forEach((button) => {
         button.addEventListener("click", () => {
-            operationButtons.forEach((node) => node.classList.remove("active"));
-            button.classList.add("active");
-
-            currentOperation = button.dataset.type;
-            const isDeposito = currentOperation === "Deposito";
-
-            if (amountLabel) {
-                amountLabel.textContent = isDeposito ? "Monto a depositar" : "Monto a retirar";
-            }
-
-            if (confirmButton) {
-                confirmButton.textContent = isDeposito ? "Confirmar Depósito" : "Confirmar Retiro";
-            }
-
-            if (summaryType) {
-                summaryType.textContent = isDeposito ? "Depósito" : "Retiro";
-            }
+            const operationType = button.dataset.type;
+            if (!operationType) return;
+            updateOperationUi(operationType);
         });
     });
 
     amountInput?.addEventListener("input", syncAmounts);
 
     accountSelect?.addEventListener("change", () => {
-        const match = accountSelect.value.match(/(\*{4}\s\*{4}\s\d{4})/);
-        if (summaryAccount) {
-            summaryAccount.textContent = match ? match[1] : accountSelect.value;
+        const accountText = accountSelect.options[accountSelect.selectedIndex]?.textContent?.trim();
+        if (summaryAccount && accountText) {
+            summaryAccount.textContent = accountText;
         }
     });
 
-    confirmButton?.addEventListener("click", () => {
-        const label = currentOperation === "Deposito" ? "depósito" : "retiro";
-        window.showUiToast?.(`Flujo de ${label} listo para integrar backend.`);
+    operationForm?.addEventListener("submit", (event) => {
+        const value = Number(amountInput?.value ?? 0);
+        if (value <= 0) {
+            event.preventDefault();
+            window.showUiToast?.("Ingresa un monto mayor a cero.");
+        }
     });
 
-    searchClient?.addEventListener("click", () => {
-        window.showUiToast?.("Cliente encontrado (modo visual).");
-    });
-
+    const initialType = operationInput?.value === "RETIRO" ? "RETIRO" : "DEPOSITO";
+    updateOperationUi(initialType);
     syncAmounts();
 });
