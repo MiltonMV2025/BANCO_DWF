@@ -36,7 +36,9 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
                         .requestMatchers(
                                 "/login", "/error", "/home",
-                                "/dashboard", "/movimientos", "/transferencias", "/pagos", "/configuracion"
+                                "/dashboard", "/movimientos", "/transferencias", "/prestamos",
+                                "/pagos", "/configuracion",
+                                "/gerencia/clientes", "/gerencia/empleados", "/gerencia/aprobacion-creditos"
                         ).permitAll()
                         .requestMatchers("/cliente/**").hasRole("CLIENTE")
                         .requestMatchers("/cajero/**").hasRole("CAJERO")

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprobación de Créditos | Panel Gerencia</title>
+    <link rel="stylesheet" th:href="@{/css/app-shell.css}">
+    <link rel="stylesheet" th:href="@{/css/aprobacion-creditos.css}">
+</head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{layout/fragments :: topbar}"></header>
+    <aside th:replace="~{layout/fragments :: sidebar('aprobacion-creditos')}"></aside>
+
+    <main class="content">
+        <h1>Aprobación de Créditos</h1>
+        <p class="subtitle">Revisión y decisión de solicitudes de préstamo</p>
+
+        <section class="credit-layout">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>DUI</th>
+                        <th>Monto</th>
+                        <th>Plazo</th>
+                        <th>Interés</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Ana García</td>
+                        <td>01234567-8</td>
+                        <td>$10,000</td>
+                        <td>3 años</td>
+                        <td>3%</td>
+                        <td><span class="badge pending">En espera</span></td>
+                        <td>
+                            <button type="button" class="link-btn">Ver</button>
+                            <span class="divider">|</span>
+                            <button type="button" class="link-btn approve">Aprobar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Pedro Solis</td>
+                        <td>04567890-1</td>
+                        <td>$50,000</td>
+                        <td>5 años</td>
+                        <td>5%</td>
+                        <td><span class="badge pending">En espera</span></td>
+                        <td>
+                            <button type="button" class="link-btn">Ver</button>
+                            <span class="divider">|</span>
+                            <button type="button" class="link-btn approve">Aprobar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>María López</td>
+                        <td>03456789-0</td>
+                        <td>$35,000</td>
+                        <td>4 años</td>
+                        <td>4%</td>
+                        <td><span class="badge rejected">Rechazado</span></td>
+                        <td><button type="button" class="link-btn">Ver motivo</button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <aside class="decision-card">
+                <h2>Panel de Decisión</h2>
+                <p class="subtitle">Solicitud seleccionada: Ana García</p>
+
+                <ul>
+                    <li><strong>Score interno:</strong> 82 / 100</li>
+                    <li><strong>Capacidad de pago:</strong> Aceptable</li>
+                    <li><strong>Historial:</strong> Sin mora en 24 meses</li>
+                    <li><strong>Relación cuota/salario:</strong> 28%</li>
+                </ul>
+
+                <div class="decision-actions">
+                    <button type="button" class="btn-reject" id="reject-credit">Rechazar</button>
+                    <button type="button" class="btn-approve" id="approve-credit">Aprobar</button>
+                </div>
+            </aside>
+        </section>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/aprobacion-creditos.js}"></script>
+</body>
+</html>

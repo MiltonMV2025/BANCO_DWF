@@ -26,13 +26,33 @@ public class HomeController {
         return "pages/transferencias";
     }
 
+    @GetMapping("/prestamos")
+    public String prestamos() {
+        return "pages/prestamos";
+    }
+
     @GetMapping("/pagos")
-    public String pagos() {
-        return "pages/pagos";
+    public String pagosLegacy() {
+        return "redirect:/prestamos";
+    }
+
+    @GetMapping("/gerencia/clientes")
+    public String clientesGerencia() {
+        return "pages/clientes";
+    }
+
+    @GetMapping("/gerencia/empleados")
+    public String empleadosGerencia() {
+        return "pages/empleados";
+    }
+
+    @GetMapping("/gerencia/aprobacion-creditos")
+    public String aprobacionCreditosGerencia() {
+        return "pages/aprobacion-creditos";
     }
 
     @GetMapping("/configuracion")
-    public String configuracion() {
-        return "pages/configuracion";
+    public String configuracionLegacy() {
+        return "redirect:/gerencia/clientes";
     }
 }

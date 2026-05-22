@@ -15,6 +15,8 @@
 
 <aside class="sidebar" th:fragment="sidebar(activeMenu)">
     <nav aria-label="Navegación principal">
+        <span class="menu-role">Panel Usuario</span>
+
         <a class="nav-item"
            th:classappend="${activeMenu == 'dashboard'} ? ' active'"
            th:href="@{/dashboard}">
@@ -33,21 +35,37 @@
            th:classappend="${activeMenu == 'transferencias'} ? ' active'"
            th:href="@{/transferencias}">
             <i class="bi bi-send nav-icon" aria-hidden="true"></i>
-            <span>Transferencias</span>
+            <span>Transacciones</span>
         </a>
 
         <a class="nav-item"
-           th:classappend="${activeMenu == 'pagos'} ? ' active'"
-           th:href="@{/pagos}">
-            <i class="bi bi-receipt nav-icon" aria-hidden="true"></i>
-            <span>Pagos</span>
+           th:classappend="${activeMenu == 'prestamos'} ? ' active'"
+           th:href="@{/prestamos}">
+            <i class="bi bi-cash-coin nav-icon" aria-hidden="true"></i>
+            <span>Mis Préstamos</span>
+        </a>
+
+        <span class="menu-role">Panel Gerencia</span>
+
+        <a class="nav-item"
+           th:classappend="${activeMenu == 'clientes'} ? ' active'"
+           th:href="@{/gerencia/clientes}">
+            <i class="bi bi-people nav-icon" aria-hidden="true"></i>
+            <span>Clientes</span>
         </a>
 
         <a class="nav-item"
-           th:classappend="${activeMenu == 'configuracion'} ? ' active'"
-           th:href="@{/configuracion}">
-            <i class="bi bi-gear nav-icon" aria-hidden="true"></i>
-            <span>Configuración</span>
+           th:classappend="${activeMenu == 'empleados'} ? ' active'"
+           th:href="@{/gerencia/empleados}">
+            <i class="bi bi-person-badge nav-icon" aria-hidden="true"></i>
+            <span>Empleados</span>
+        </a>
+
+        <a class="nav-item"
+           th:classappend="${activeMenu == 'aprobacion-creditos'} ? ' active'"
+           th:href="@{/gerencia/aprobacion-creditos}">
+            <i class="bi bi-patch-check nav-icon" aria-hidden="true"></i>
+            <span>Aprobación Créditos</span>
         </a>
     </nav>
 </aside>

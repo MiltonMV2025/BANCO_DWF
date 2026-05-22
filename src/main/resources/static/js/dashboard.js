@@ -3,6 +3,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     actionButtons.forEach((button) => {
         button.addEventListener("click", () => {
+            const targetRoute = button.dataset.route;
+            if (targetRoute) {
+                window.location.href = targetRoute;
+                return;
+            }
             window.showUiToast?.(`Flujo "${button.dataset.action}" listo para integrar backend.`);
         });
     });

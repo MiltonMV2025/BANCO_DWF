@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes | Panel Gerencia</title>
+    <link rel="stylesheet" th:href="@{/css/app-shell.css}">
+    <link rel="stylesheet" th:href="@{/css/clientes.css}">
+</head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{layout/fragments :: topbar}"></header>
+    <aside th:replace="~{layout/fragments :: sidebar('clientes')}"></aside>
+
+    <main class="content">
+        <section class="header-row">
+            <div>
+                <h1>Clientes</h1>
+                <p class="subtitle">Gestión de cartera de clientes del banco</p>
+            </div>
+            <button type="button" class="btn-primary" id="new-client-btn">
+                <i class="bi bi-plus"></i>
+                Nuevo Cliente
+            </button>
+        </section>
+
+        <section class="filters-row">
+            <input type="text" id="search-client" placeholder="Buscar por nombre, DUI o cuenta">
+            <select id="status-filter">
+                <option>Todos los estados</option>
+                <option>Activos</option>
+                <option>Inactivos</option>
+            </select>
+            <button type="button" class="btn-secondary" id="apply-filter">Filtrar</button>
+        </section>
+
+        <section class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>DUI</th>
+                    <th>Cuentas</th>
+                    <th>Saldo Total</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr data-id="1" data-nombre="Ana García" data-dui="01234567-8" data-salario="1200.00" data-estado="Activo">
+                    <td>Ana García</td>
+                    <td>01234567-8</td>
+                    <td>2</td>
+                    <td>$12,850.00</td>
+                    <td><span class="badge ok">Activo</span></td>
+                    <td>
+                        <button type="button" class="link-btn view-btn">Ver perfil</button>
+                        <span class="action-divider">|</span>
+                        <button type="button" class="link-btn edit-btn">Editar</button>
+                        <span class="action-divider">|</span>
+                        <button type="button" class="link-btn delete-btn">Eliminar</button>
+                    </td>
+                </tr>
+                <tr data-id="2" data-nombre="Luis Ramos" data-dui="02345678-9" data-salario="900.00" data-estado="Activo">
+                    <td>Luis Ramos</td>
+                    <td>02345678-9</td>
+                    <td>1</td>
+                    <td>$2,340.00</td>
+                    <td><span class="badge ok">Activo</span></td>
+                    <td>
+                        <button type="button" class="link-btn view-btn">Ver perfil</button>
+                        <span class="action-divider">|</span>
+                        <button type="button" class="link-btn edit-btn">Editar</button>
+                        <span class="action-divider">|</span>
+                        <button type="button" class="link-btn delete-btn">Eliminar</button>
+                    </td>
+                </tr>
+                <tr data-id="3" data-nombre="María López" data-dui="03456789-0" data-salario="2500.00" data-estado="Monitoreo">
+                    <td>María López</td>
+                    <td>03456789-0</td>
+                    <td>3</td>
+                    <td>$41,120.00</td>
+                    <td><span class="badge warn">Monitoreo</span></td>
+                    <td>
+                        <button type="button" class="link-btn view-btn">Ver perfil</button>
+                        <span class="action-divider">|</span>
+                        <button type="button" class="link-btn edit-btn">Editar</button>
+                        <span class="action-divider">|</span>
+                        <button type="button" class="link-btn delete-btn">Eliminar</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="modal-backdrop" id="client-modal" aria-hidden="true">
+    <div class="modal-card">
+        <h2 class="modal-title" id="client-modal-title">Nuevo Cliente</h2>
+        <p class="modal-subtitle">Formulario CRUD visual (sin backend)</p>
+
+        <form id="client-form" class="crud-form">
+            <input type="hidden" id="client-id">
+
+            <div class="crud-grid">
+                <div class="crud-field">
+                    <label for="client-name">Nombre</label>
+                    <input id="client-name" type="text" required maxlength="120">
+                </div>
+
+                <div class="crud-field">
+                    <label for="client-dui">DUI</label>
+                    <input id="client-dui" type="text" required maxlength="10" placeholder="00000000-0">
+                </div>
+
+                <div class="crud-field">
+                    <label for="client-salary">Salario</label>
+                    <input id="client-salary" type="number" min="0" step="0.01" required>
+                </div>
+
+                <div class="crud-field">
+                    <label for="client-status">Estado</label>
+                    <select id="client-status" required>
+                        <option>Activo</option>
+                        <option>Monitoreo</option>
+                        <option>Inactivo</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-secondary" id="client-cancel">Cancelar</button>
+            <button type="button" class="btn-modal-primary" id="client-save">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="client-delete-modal" aria-hidden="true">
+    <div class="modal-card modal-card-sm">
+        <h2 class="modal-title">Eliminar Cliente</h2>
+        <p class="modal-subtitle" id="client-delete-text">¿Deseas eliminar este cliente?</p>
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-secondary" id="client-delete-cancel">Cancelar</button>
+            <button type="button" class="btn-modal-danger" id="client-delete-confirm">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/clientes.js}"></script>
+</body>
+</html>

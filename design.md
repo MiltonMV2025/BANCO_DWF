@@ -1,34 +1,32 @@
 # Design System Base - BANCO_DWF
 
-> Esta es la base oficial del frontend.  
-> Todo cambio visual nuevo debe respetar este documento.
+> Base oficial para frontend del proyecto.  
+> Se trabaja con UX separada por perfil: **Usuario** y **Gerente**.
 
-## 1) Stack UI permitido (actual)
+## 1) Stack UI permitido
 
-- Thymeleaf para vistas server-side.
-- CSS vanilla.
-- JavaScript vanilla.
-- Bootstrap Icons (CDN) para iconografía consistente.
-- Sin frameworks CSS externos por ahora.
+- Thymeleaf (SSR)
+- CSS vanilla
+- JavaScript vanilla
+- Bootstrap Icons (CDN)
 
 ## 2) Fuente de verdad actual
 
-- `src/main/resources/static/css/login.css`
-- `src/main/resources/templates/pages/login.html`
-- `src/main/resources/static/css/app-shell.css`
-- `src/main/resources/static/css/dashboard.css`
-- `src/main/resources/static/css/movimientos.css`
-- `src/main/resources/static/css/transferencias.css`
-- `src/main/resources/static/css/pagos.css`
-- `src/main/resources/static/css/configuracion.css`
-- `src/main/resources/templates/layout/fragments.html`
-- `src/main/resources/templates/pages/dashboard.html`
-- `src/main/resources/templates/pages/movimientos.html`
-- `src/main/resources/templates/pages/transferencias.html`
-- `src/main/resources/templates/pages/pagos.html`
-- `src/main/resources/templates/pages/configuracion.html`
+- Shared:
+  - `templates/layout/fragments.html`
+  - `static/css/app-shell.css`
+  - `static/js/app-shell.js`
+- Usuario:
+  - `pages/dashboard.html` + `css/dashboard.css` + `js/dashboard.js`
+  - `pages/movimientos.html` + `css/movimientos.css` + `js/movimientos.js`
+  - `pages/transferencias.html` + `css/transferencias.css` + `js/transferencias.js`
+  - `pages/prestamos.html` + `css/prestamos.css` + `js/prestamos.js`
+- Gerente:
+  - `pages/clientes.html` + `css/clientes.css` + `js/clientes.js`
+  - `pages/empleados.html` + `css/empleados.css` + `js/empleados.js`
+  - `pages/aprobacion-creditos.html` + `css/aprobacion-creditos.css` + `js/aprobacion-creditos.js`
 
-## 3) Tokens visuales
+## 3) Tokens base
 
 ```css
 :root {
@@ -46,159 +44,75 @@
 }
 ```
 
-### Colores de soporte
+## 4) Shell y navegación
 
-- Topbar: `#000000`
-- Fondo sidebar: `#13151b` a `#171922`
-- Hover sidebar: `#20242d`
-- Fondo KPI card: `#ffffff`
-
-## 4) Tipografia
-
-- Unica familia permitida: `"Segoe UI", Tahoma, Geneva, Verdana, sans-serif`.
-- No introducir otra familia sin decision arquitectonica.
-
-## 5) Layouts aprobados
-
-### 5.1 Login
-
-- Grid 2 columnas `minmax(320px, 42%) 1fr`.
-- Breakpoint principal: `max-width: 920px`.
-
-### 5.2 App interna (Dashboard/Movimientos/etc.)
-
-- Shell de 3 zonas:
-  - Topbar superior
-  - Sidebar izquierdo
-  - Content principal
-- Sidebar con estado activo en amarillo (`--accent`).
-- Modulos actuales:
+- Header y sidebar siempre compartidos.
+- Menú unificado visible para todos en esta fase:
   - Dashboard
   - Movimientos
-  - Transferencias
-  - Pagos
-  - Configuracion
+  - Transacciones
+  - Mis Préstamos
+  - Clientes
+  - Empleados
+  - Aprobación Créditos
+- **Configuración removida** de UX actual.
+- Nota: en un refactor posterior se aplicará visibilidad por rol.
 
-## 6) Componentes base
+## 5) Reglas de UX separada
 
-### 6.1 Inputs y Selects
+### Usuario
+- Ve y opera sus cuentas, transacciones y solicitudes de préstamo.
+- No aprueba créditos ni administra personal.
 
-- Altura: `38px` (filtros) o `44px` (formularios generales).
-- Radio: `8px` a `10px`.
-- Borde: `1px solid var(--border-color)`.
-- Focus:
-  - `border-color: #c7a008`
-  - `box-shadow: 0 0 0 3px rgba(245, 196, 0, 0.2)`
-- Para fechas en filtros, usar `input[type="date"]` (no `text`) para mostrar calendario nativo.
+### Gerente
+- Gestiona cartera de clientes.
+- Gestiona empleados.
+- Revisa y decide solicitudes en Aprobación de Créditos.
 
-### 6.2 Botones
+### Visibilidad temporal
+- En esta fase TODAS las rutas se muestran en el sidebar.
+- En refactor posterior se aplicará visibilidad por rol/permisos.
 
-- Primario (`btn-accent`):
-  - Fondo: `var(--accent)`
-  - Texto: `#111`
-  - Peso: `700`
-  - Altura: `38px` a `46px`
-  - Radio: `8px` a `10px`
-- Secundario (outline):
-  - Fondo blanco
-  - Borde oscuro
-  - Mismas alturas segun contexto
+## 6) Patrones de componentes
 
-### 6.3 Tabla de Movimientos
+- Inputs/selects: 38px a 44px, radio 8px-10px.
+- Fechas en filtros: `input[type="date"]`.
+- Botón primario: fondo `--accent`, texto oscuro, peso 700.
+- Toast: feedback visual sin backend.
+- Modales CRUD frontend (sin backend) para altas/ediciones/eliminaciones:
+  - Clientes: `nombre`, `dui`, `salario`, `estado`
+  - Empleados: `nombre`, `rol`, `estado` (+ sucursal visual para la UI)
+- Badges estado:
+  - verde = aprobado/activo
+  - amarillo = en espera
+  - rojo = rechazado
 
-- Cabecera sobria con borde inferior.
-- Filas cebra en grises suaves.
-- Columna monto alineada a la derecha.
-- Montos positivos en `--success`.
-- Montos negativos en tono rojo suave.
+## 7) Rutas frontend
 
-### 6.4 Paginacion
+### Usuario
+- `/dashboard`
+- `/movimientos`
+- `/transferencias`
+- `/prestamos`
 
-- Centrada abajo de la tabla.
-- Boton activo con fondo `--accent`.
-- Flechas laterales para anterior/siguiente.
+### Gerente
+- `/gerencia/clientes`
+- `/gerencia/empleados`
+- `/gerencia/aprobacion-creditos`
 
-### 6.5 Tarjetas KPI (Dashboard)
+### Legacy
+- `/pagos` redirige a `/prestamos`
+- `/configuracion` redirige a `/gerencia/clientes`
 
-- Fondo blanco (`--surface`).
-- Borde general `1px solid var(--border-color)`.
-- Borde izquierdo de acento amarillo.
-- Radio `11px`.
-- Ícono de KPI al extremo derecho usando Bootstrap Icons.
+## 8) Arquitectura por pantalla (obligatorio)
 
-### 6.6 Toast de feedback visual
+- No monolito de vista/CSS/JS.
+- Shared en shell.
+- Cada pantalla con su propio HTML/CSS/JS.
 
-- Fondo oscuro `#111827`.
-- Texto blanco.
-- Radio `10px`.
-- Uso en acciones frontend sin backend.
+## 9) Checklist por iteración
 
-### 6.7 Header y sesión
-
-- El header debe incluir:
-  - Avatar de usuario.
-  - Botón de logout visible.
-- Logout debe ejecutar acción real contra `/logout` usando formulario `POST`.
-
-### 6.8 Dashboard operacional (cajero)
-
-- Encabezado de bienvenida con nombre y sucursal.
-- Tabla de actividad reciente con badges de estado:
-  - `Completado` (verde)
-  - `En espera` (amarillo)
-- Bloque de acciones inferiores en dos columnas:
-  - Izquierda: botón outline fuerte.
-  - Derecha: botón acento amarillo.
-
-## 7) Reglas de flujo frontend (fase actual)
-
-- No consumir endpoints reales todavia.
-- Navegacion por rutas dedicadas por pantalla:
-  - `/dashboard`
-  - `/movimientos`
-  - `/transferencias`
-  - `/pagos`
-  - `/configuracion`
-- Filtros, botones y paginacion en modo visual.
-- Se permite data mock para validar UX.
-
-## 8) Arquitectura frontend por pantalla (OBLIGATORIO)
-
-- No centralizar todas las vistas en una sola plantilla.
-- No centralizar toda la logica en un solo JS.
-- No centralizar todos los estilos en un solo CSS.
-
-Estructura aprobada:
-
-- **Compartido**
-  - `templates/layout/fragments.html` (topbar/sidebar)
-  - `css/app-shell.css` (layout y tokens comunes)
-  - `js/app-shell.js` (utilidades comunes como toast)
-- **Por pantalla**
-  - `pages/<pantalla>.html`
-  - `css/<pantalla>.css`
-  - `js/<pantalla>.js`
-
-## 9) Convenciones de estructura
-
-- CSS: `src/main/resources/static/css/`
-- JS: `src/main/resources/static/js/`
-- Vistas: `src/main/resources/templates/pages/`
-- Layouts compartidos: `src/main/resources/templates/layout/`
-
-## 10) Regla de evolucion del documento
-
-1. Si agregas un patron visual nuevo, actualiza `design.md` en el mismo cambio.
-2. Si agregas token nuevo, justificar su necesidad.
-3. Mantener consistencia de spacing, radios, focus y contraste.
-4. Evitar introducir librerias UI sin decision formal.
-
-## 11) Checklist obligatorio antes de cerrar una pantalla
-
-- [ ] Use los tokens oficiales.
-- [ ] Mantuve tipografia oficial.
-- [ ] Inputs/selects/botones respetan alturas y radios definidos.
-- [ ] Estados hover/focus son visibles.
-- [ ] Responsive funcional en tablet/mobile.
-- [ ] Pantalla separada en su propio HTML/CSS/JS.
-- [ ] Documente en este archivo cualquier patron nuevo.
+- [ ] Respeta tokens y tipografía.
+- [ ] Mantiene separación usuario vs gerente.
+- [ ] Mantiene pantalla separada por archivo.
+- [ ] Actualiza `design.md` y `FRONTEND_TODO.md` si cambia el flujo.
