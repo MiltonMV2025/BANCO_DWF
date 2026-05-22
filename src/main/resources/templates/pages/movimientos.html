@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movimientos | Banco de Agricultura Salvadoreño</title>
+    <link rel="stylesheet" th:href="@{/css/app-shell.css}">
+    <link rel="stylesheet" th:href="@{/css/movimientos.css}">
+</head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{layout/fragments :: topbar}"></header>
+    <aside th:replace="~{layout/fragments :: sidebar('movimientos')}"></aside>
+
+    <main class="content">
+        <h1>Movimientos</h1>
+        <p class="subtitle">Historial de transacciones de tus cuentas</p>
+
+        <div class="movements-filters">
+            <div class="filter-field">
+                <label for="movement-account">Seleccionar cuenta</label>
+                <select id="movement-account">
+                    <option>Cuenta Ahorros *4821</option>
+                    <option>Cuenta Corriente *7392</option>
+                    <option>Cuenta Ahorros *2156</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="from-date">Desde</label>
+                <input id="from-date" type="date" value="2025-03-01">
+            </div>
+
+            <div class="filter-field">
+                <label for="to-date">Hasta</label>
+                <input id="to-date" type="date" value="2025-04-05">
+            </div>
+
+            <div class="filter-field filter-action">
+                <button type="button" class="btn-accent" id="apply-filter">Filtrar</button>
+            </div>
+        </div>
+
+        <div class="movements-table-wrap">
+            <table class="movements-table">
+                <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Descripción</th>
+                    <th>Tipo</th>
+                    <th class="amount-col">Monto</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>05/04/2025</td>
+                    <td>Depósito en efectivo</td>
+                    <td>Depósito</td>
+                    <td class="positive amount-col">+$500.00</td>
+                </tr>
+                <tr>
+                    <td>04/04/2025</td>
+                    <td>Pago de servicio ANDA</td>
+                    <td>Retiro</td>
+                    <td class="negative amount-col">-$45.00</td>
+                </tr>
+                <tr>
+                    <td>03/04/2025</td>
+                    <td>Transferencia recibida</td>
+                    <td>Depósito</td>
+                    <td class="positive amount-col">+$200.00</td>
+                </tr>
+                <tr>
+                    <td>02/04/2025</td>
+                    <td>Retiro cajero automático</td>
+                    <td>Retiro</td>
+                    <td class="negative amount-col">-$100.00</td>
+                </tr>
+                <tr>
+                    <td>01/04/2025</td>
+                    <td>Depósito nómina</td>
+                    <td>Depósito</td>
+                    <td class="positive amount-col">+$1250.00</td>
+                </tr>
+                <tr>
+                    <td>31/03/2025</td>
+                    <td>Transferencia enviada</td>
+                    <td>Retiro</td>
+                    <td class="negative amount-col">-$75.00</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <button type="button" class="page-btn page-arrow" data-page="prev">&#8249;</button>
+            <button type="button" class="page-btn active" data-page="1">1</button>
+            <button type="button" class="page-btn" data-page="2">2</button>
+            <button type="button" class="page-btn" data-page="3">3</button>
+            <button type="button" class="page-btn page-arrow" data-page="next">&#8250;</button>
+        </div>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/movimientos.js}"></script>
+</body>
+</html>

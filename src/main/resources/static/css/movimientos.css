@@ -1,0 +1,148 @@
+.movements-filters {
+    display: grid;
+    grid-template-columns: minmax(280px, 1.4fr) 1fr 1fr auto;
+    gap: 0.55rem;
+    margin-bottom: 1rem;
+    align-items: end;
+}
+
+.filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.filter-field label {
+    color: #374151;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.filter-field select,
+.filter-field input {
+    height: 38px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text-main);
+    padding: 0 0.68rem;
+    outline: none;
+    font-size: 0.95rem;
+}
+
+.filter-field input[type="date"] {
+    appearance: auto;
+    -webkit-appearance: auto;
+    cursor: pointer;
+}
+
+.filter-field input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}
+
+.filter-field select:focus,
+.filter-field input:focus {
+    border-color: #c7a008;
+    box-shadow: 0 0 0 3px rgba(245, 196, 0, 0.2);
+}
+
+.filter-action .btn-accent {
+    min-width: 84px;
+    height: 38px;
+    border-radius: 8px;
+}
+
+.btn-accent {
+    border: none;
+    background: var(--accent);
+    color: #111;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-accent:hover {
+    filter: brightness(0.96);
+}
+
+.movements-table-wrap {
+    overflow-x: auto;
+}
+
+.movements-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.movements-table th,
+.movements-table td {
+    text-align: left;
+    padding: 0.78rem 0.65rem;
+    font-size: 0.96rem;
+}
+
+.movements-table th {
+    color: #4b5563;
+    font-weight: 700;
+    border-bottom: 1px solid #d8dce0;
+}
+
+.movements-table tbody tr:nth-child(even) {
+    background: #e8e8e8;
+}
+
+.movements-table tbody tr:nth-child(odd) {
+    background: #efefef;
+}
+
+.amount-col {
+    text-align: right !important;
+}
+
+.positive {
+    color: var(--success);
+    font-weight: 700;
+}
+
+.negative {
+    color: #cc6b5f;
+    font-weight: 700;
+}
+
+.pagination {
+    margin-top: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+.page-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #374151;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.page-btn:hover {
+    background: #e5e7eb;
+}
+
+.page-btn.active {
+    background: var(--accent);
+    color: #111;
+}
+
+.page-arrow {
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
+@media (max-width: 980px) {
+    .movements-filters {
+        grid-template-columns: 1fr;
+    }
+}

@@ -34,7 +34,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
-                        .requestMatchers("/login", "/error").permitAll()
+                        .requestMatchers(
+                                "/login", "/error", "/home",
+                                "/dashboard", "/movimientos", "/transferencias", "/pagos", "/configuracion"
+                        ).permitAll()
                         .requestMatchers("/cliente/**").hasRole("CLIENTE")
                         .requestMatchers("/cajero/**").hasRole("CAJERO")
                         .requestMatchers("/dependiente/**").hasRole("DEPENDIENTE")
