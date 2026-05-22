@@ -83,9 +83,12 @@
   - rojo = rechazado
 - Transferencias:
   - Búsqueda por DUI
-  - Selección de cuenta real
-  - Depósito/Retiro persiste `movimiento` y actualiza `saldo`
+  - Selección de cuenta real (origen)
+  - Soporte de transferencia entre cuentas (origen -> destino)
+  - Depósito/Retiro/Transferencia persiste `movimiento` y actualiza `saldo`
   - Debe mostrar empty state si no hay cliente, cuentas o movimientos
+- Alta de cliente:
+  - Al crear cliente se crea automáticamente una cuenta base de ahorro con saldo inicial 0.00
 
 ## 7) Rutas frontend
 

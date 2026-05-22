@@ -46,7 +46,7 @@
                     <div class="client-accounts" th:if="${!#lists.isEmpty(cuentasCliente)}">
                         <span class="account-pill"
                               th:each="cuenta : ${cuentasCliente}"
-                              th:text="${'**** ' + cuenta.idCuenta + ' — ' + cuenta.tipo}">
+                              th:text="${(cuenta.numeroCuenta != null ? cuenta.numeroCuenta : '**** ' + cuenta.idCuenta) + ' — ' + cuenta.tipo}">
                             **** 0 — Cuenta
                         </span>
                     </div>
@@ -67,7 +67,7 @@
                             <option th:each="cuenta : ${cuentasCliente}"
                                     th:value="${cuenta.idCuenta}"
                                     th:selected="${cuentaSeleccionada != null and cuenta.idCuenta == cuentaSeleccionada.idCuenta}"
-                                    th:text="${'**** ' + cuenta.idCuenta + ' — ' + cuenta.tipo}">
+                                    th:text="${(cuenta.numeroCuenta != null ? cuenta.numeroCuenta : '**** ' + cuenta.idCuenta) + ' — ' + cuenta.tipo}">
                                 Cuenta
                             </option>
                         </select>
@@ -92,11 +92,29 @@
                             <button type="button" class="operation-btn"
                                     th:classappend="${tipoOperacion == 'RETIRO'} ? ' active'"
                                     data-type="RETIRO">Retiro</button>
+                            <button type="button" class="operation-btn"
+                                    th:classappend="${tipoOperacion == 'TRANSFERENCIA'} ? ' active'"
+                                    data-type="TRANSFERENCIA">Transferencia</button>
                         </div>
                     </div>
 
+                    <div class="form-group" id="destination-account-group"
+                         th:classappend="${tipoOperacion != 'TRANSFERENCIA'} ? ' hidden'">
+                        <label for="destination-account-select">Cuenta destino</label>
+                        <select id="destination-account-select" name="cuentaDestinoId">
+                            <option value="">Selecciona una cuenta destino</option>
+                            <option th:each="cuentaDestino : ${cuentasDestino}"
+                                    th:if="${cuentaSeleccionada == null or cuentaDestino.idCuenta != cuentaSeleccionada.idCuenta}"
+                                    th:value="${cuentaDestino.idCuenta}"
+                                    th:selected="${cuentaDestinoId != null and cuentaDestino.idCuenta == cuentaDestinoId}"
+                                    th:text="${(cuentaDestino.numeroCuenta != null ? cuentaDestino.numeroCuenta : '**** ' + cuentaDestino.idCuenta) + ' — ' + cuentaDestino.cliente.nombre}">
+                                Cuenta destino
+                            </option>
+                        </select>
+                    </div>
+
                     <div class="form-group">
-                        <label for="amount-input" id="amount-label" th:text="${tipoOperacion == 'RETIRO'} ? 'Monto a retirar' : 'Monto a depositar'">
+                        <label for="amount-input" id="amount-label" th:text="${tipoOperacion == 'RETIRO'} ? 'Monto a retirar' : (${tipoOperacion == 'TRANSFERENCIA'} ? 'Monto a transferir' : 'Monto a depositar')">
                             Monto
                         </label>
                         <div class="amount-wrap">
@@ -110,7 +128,7 @@
                     </div>
 
                     <button type="submit" class="btn-confirm" id="confirm-action">
-                        Confirmar <span th:text="${tipoOperacion == 'RETIRO'} ? 'Retiro' : 'Depósito'">Depósito</span>
+                        Confirmar <span th:text="${tipoOperacion == 'RETIRO'} ? 'Retiro' : (${tipoOperacion == 'TRANSFERENCIA'} ? 'Transferencia' : 'Depósito')">Depósito</span>
                     </button>
                 </form>
 
@@ -152,11 +170,18 @@
                         </div>
                         <div>
                             <dt>Cuenta:</dt>
-                            <dd id="summary-account" th:text="${cuentaSeleccionada != null ? '**** ' + cuentaSeleccionada.idCuenta : 'N/D'}">N/D</dd>
+                            <dd id="summary-account" th:text="${cuentaSeleccionada != null ? (cuentaSeleccionada.numeroCuenta != null ? cuentaSeleccionada.numeroCuenta : '**** ' + cuentaSeleccionada.idCuenta) : 'N/D'}">N/D</dd>
+                        </div>
+                        <div id="summary-destination-row" th:classappend="${tipoOperacion != 'TRANSFERENCIA'} ? ' hidden'">
+                            <dt>Destino:</dt>
+                            <dd id="summary-destination"
+                                th:text="${cuentaDestinoSeleccionada != null ? (cuentaDestinoSeleccionada.numeroCuenta != null ? cuentaDestinoSeleccionada.numeroCuenta : 'Cuenta #' + cuentaDestinoSeleccionada.idCuenta) : 'N/D'}">
+                                N/D
+                            </dd>
                         </div>
                         <div>
                             <dt>Tipo:</dt>
-                            <dd id="summary-type" th:text="${tipoOperacion == 'RETIRO'} ? 'Retiro' : 'Depósito'">Depósito</dd>
+                            <dd id="summary-type" th:text="${tipoOperacion == 'RETIRO'} ? 'Retiro' : (${tipoOperacion == 'TRANSFERENCIA'} ? 'Transferencia' : 'Depósito')">Depósito</dd>
                         </div>
                         <div>
                             <dt>Monto:</dt>

@@ -76,8 +76,17 @@ public class HomeController {
 
         final LocalDate fechaDesde = desde == null ? LocalDate.now().minusMonths(1) : desde;
         final LocalDate fechaHasta = hasta == null ? LocalDate.now() : hasta;
-        model.addAttribute("desdeMovimiento", fechaDesde);
-        model.addAttribute("hastaMovimiento", fechaHasta);
+
+        LocalDate fechaDesdeFiltro = fechaDesde;
+        LocalDate fechaHastaFiltro = fechaHasta;
+        if (fechaDesde.isAfter(fechaHasta)) {
+            fechaDesdeFiltro = fechaHasta;
+            fechaHastaFiltro = fechaDesde;
+            model.addAttribute("toastMessage", "Rango invertido detectado: se ajustó automáticamente.");
+        }
+
+        model.addAttribute("desdeMovimiento", fechaDesdeFiltro);
+        model.addAttribute("hastaMovimiento", fechaHastaFiltro);
 
         if (cuentas.isEmpty()) {
             model.addAttribute("movimientos", List.of());
@@ -88,7 +97,7 @@ public class HomeController {
         model.addAttribute("cuentaSeleccionadaId", cuentaSeleccionadaId);
 
         final List<Movimiento> movimientos = movimientoRepository
-                .findAllByCuenta_IdCuentaAndFechaBetweenOrderByFechaDescIdMovimientoDesc(cuentaSeleccionadaId, fechaDesde, fechaHasta);
+                .findAllByCuenta_IdCuentaAndFechaBetweenOrderByFechaDescIdMovimientoDesc(cuentaSeleccionadaId, fechaDesdeFiltro, fechaHastaFiltro);
         model.addAttribute("movimientos", movimientos);
         return "pages/movimientos";
     }
@@ -97,6 +106,7 @@ public class HomeController {
     public String transferencias(
             @RequestParam(required = false) final String dui,
             @RequestParam(required = false) final Integer cuentaId,
+            @RequestParam(required = false) final Integer cuentaDestinoId,
             @RequestParam(required = false, defaultValue = "DEPOSITO") final String tipo,
             @RequestParam(required = false, defaultValue = "0") final BigDecimal monto,
             final Model model
@@ -104,9 +114,12 @@ public class HomeController {
         final String duiBusqueda = dui == null ? "" : dui.trim();
         model.addAttribute("duiBusqueda", duiBusqueda);
 
-        final boolean isDeposito = !"RETIRO".equalsIgnoreCase(tipo);
-        model.addAttribute("tipoOperacion", isDeposito ? "DEPOSITO" : "RETIRO");
+        final String tipoOperacion = normalizarTipoOperacion(tipo);
+        model.addAttribute("tipoOperacion", tipoOperacion);
         model.addAttribute("montoOperacion", monto.max(BigDecimal.ZERO));
+        model.addAttribute("cuentaDestinoId", cuentaDestinoId);
+        model.addAttribute("cuentasDestino", List.of());
+        model.addAttribute("cuentaDestinoSeleccionada", null);
 
         if (duiBusqueda.isEmpty()) {
             model.addAttribute("clienteEncontrado", false);
@@ -127,9 +140,15 @@ public class HomeController {
 
         final Cliente cliente = clienteOpt.get();
         final List<Cuenta> cuentas = cuentaRepository.findAllByCliente_Id(cliente.getId());
+        final List<Cuenta> cuentasDestino = cuentaRepository.findAllByOrderByIdCuentaAsc();
+        final Cuenta cuentaDestinoSeleccionada = cuentaDestinoId == null
+                ? null
+                : cuentasDestino.stream().filter(cuenta -> cuentaDestinoId.equals(cuenta.getIdCuenta())).findFirst().orElse(null);
         model.addAttribute("clienteEncontrado", true);
         model.addAttribute("cliente", cliente);
         model.addAttribute("cuentasCliente", cuentas);
+        model.addAttribute("cuentasDestino", cuentasDestino);
+        model.addAttribute("cuentaDestinoSeleccionada", cuentaDestinoSeleccionada);
         model.addAttribute("fechaOperacion", LocalDate.now());
 
         Cuenta cuentaSeleccionada = null;
@@ -160,19 +179,21 @@ public class HomeController {
     @PostMapping("/transferencias/procesar")
     public String procesarTransferencia(
             @RequestParam final Integer cuentaId,
+            @RequestParam(required = false) final Integer cuentaDestinoId,
             @RequestParam final String tipo,
             @RequestParam final BigDecimal monto,
             @RequestParam final String dui,
             final RedirectAttributes redirectAttributes
     ) {
         try {
-            transferenciaService.procesarMovimiento(cuentaId, tipo, monto);
+            transferenciaService.procesarMovimiento(cuentaId, cuentaDestinoId, tipo, monto);
             redirectAttributes.addFlashAttribute("toastMessage", "Movimiento procesado correctamente.");
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("toastMessage", exception.getMessage());
         }
 
-        return "redirect:/transferencias?dui=" + dui + "&cuentaId=" + cuentaId + "&tipo=" + tipo + "&monto=" + monto;
+        final String destinoParam = cuentaDestinoId == null ? "" : "&cuentaDestinoId=" + cuentaDestinoId;
+        return "redirect:/transferencias?dui=" + dui + "&cuentaId=" + cuentaId + "&tipo=" + tipo + "&monto=" + monto + destinoParam;
     }
 
     @GetMapping("/prestamos")
@@ -255,6 +276,18 @@ public class HomeController {
             case "ACTIVOS" -> "ACTIVO";
             case "INACTIVOS" -> "INACTIVO";
             default -> estado.trim();
+        };
+    }
+
+    private String normalizarTipoOperacion(final String tipo) {
+        if (tipo == null || tipo.isBlank()) {
+            return "DEPOSITO";
+        }
+
+        return switch (tipo.trim().toUpperCase()) {
+            case "RETIRO" -> "RETIRO";
+            case "TRANSFERENCIA" -> "TRANSFERENCIA";
+            default -> "DEPOSITO";
         };
     }
 }

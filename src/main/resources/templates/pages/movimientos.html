@@ -24,7 +24,7 @@
                     <option th:each="cuenta : ${cuentasMovimiento}"
                             th:value="${cuenta.idCuenta}"
                             th:selected="${cuentaSeleccionadaId != null and cuenta.idCuenta == cuentaSeleccionadaId}"
-                            th:text="${'**** ' + cuenta.idCuenta + ' — ' + cuenta.tipo}">
+                            th:text="${(cuenta.numeroCuenta != null ? cuenta.numeroCuenta : '**** ' + cuenta.idCuenta) + ' — ' + cuenta.tipo}">
                         Cuenta
                     </option>
                 </select>

@@ -11,6 +11,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const operationInput = document.getElementById("operation-type-input");
     const amountHiddenInput = document.getElementById("operation-amount-input");
     const operationForm = document.getElementById("transfer-operation-form");
+    const destinationGroup = document.getElementById("destination-account-group");
+    const destinationSelect = document.getElementById("destination-account-select");
+    const summaryDestinationRow = document.getElementById("summary-destination-row");
+    const summaryDestination = document.getElementById("summary-destination");
 
     const formatCurrency = (value) => {
         const number = Number(value || 0);
@@ -27,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const updateOperationUi = (operationType) => {
         const isDeposito = operationType === "DEPOSITO";
+        const isTransferencia = operationType === "TRANSFERENCIA";
         if (operationInput) operationInput.value = operationType;
 
         operationButtons.forEach((button) => {
@@ -34,15 +39,26 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (amountLabel) {
-            amountLabel.textContent = isDeposito ? "Monto a depositar" : "Monto a retirar";
+            amountLabel.textContent = isTransferencia
+                ? "Monto a transferir"
+                : (isDeposito ? "Monto a depositar" : "Monto a retirar");
         }
 
         if (confirmButton) {
-            confirmButton.innerHTML = `Confirmar <span>${isDeposito ? "Depósito" : "Retiro"}</span>`;
+            const label = isTransferencia ? "Transferencia" : (isDeposito ? "Depósito" : "Retiro");
+            confirmButton.innerHTML = `Confirmar <span>${label}</span>`;
         }
 
         if (summaryType) {
-            summaryType.textContent = isDeposito ? "Depósito" : "Retiro";
+            summaryType.textContent = isTransferencia ? "Transferencia" : (isDeposito ? "Depósito" : "Retiro");
+        }
+
+        if (destinationGroup) {
+            destinationGroup.classList.toggle("hidden", !isTransferencia);
+        }
+
+        if (summaryDestinationRow) {
+            summaryDestinationRow.classList.toggle("hidden", !isTransferencia);
         }
     };
 
@@ -63,15 +79,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    destinationSelect?.addEventListener("change", () => {
+        const destinationText = destinationSelect.options[destinationSelect.selectedIndex]?.textContent?.trim();
+        if (summaryDestination) {
+            summaryDestination.textContent = destinationText || "N/D";
+        }
+    });
+
     operationForm?.addEventListener("submit", (event) => {
         const value = Number(amountInput?.value ?? 0);
         if (value <= 0) {
             event.preventDefault();
             window.showUiToast?.("Ingresa un monto mayor a cero.");
+            return;
+        }
+
+        if (operationInput?.value === "TRANSFERENCIA" && !destinationSelect?.value) {
+            event.preventDefault();
+            window.showUiToast?.("Selecciona la cuenta destino.");
         }
     });
 
-    const initialType = operationInput?.value === "RETIRO" ? "RETIRO" : "DEPOSITO";
+    const initialType = operationInput?.value === "RETIRO"
+        ? "RETIRO"
+        : (operationInput?.value === "TRANSFERENCIA" ? "TRANSFERENCIA" : "DEPOSITO");
     updateOperationUi(initialType);
     syncAmounts();
 });

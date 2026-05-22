@@ -2,37 +2,45 @@ package sv.edu.udb.banco.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import sv.edu.udb.banco.entity.Cliente;
+import sv.edu.udb.banco.entity.Cuenta;
 import sv.edu.udb.banco.entity.Empleado;
 import sv.edu.udb.banco.entity.Prestamo;
 import sv.edu.udb.banco.repository.ClienteRepository;
+import sv.edu.udb.banco.repository.CuentaRepository;
 import sv.edu.udb.banco.repository.EmpleadoRepository;
 import sv.edu.udb.banco.repository.PrestamoRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Controller
 public class GerenciaController {
 
     private final ClienteRepository clienteRepository;
+    private final CuentaRepository cuentaRepository;
     private final EmpleadoRepository empleadoRepository;
     private final PrestamoRepository prestamoRepository;
 
     public GerenciaController(
             final ClienteRepository clienteRepository,
+            final CuentaRepository cuentaRepository,
             final EmpleadoRepository empleadoRepository,
             final PrestamoRepository prestamoRepository
     ) {
         this.clienteRepository = clienteRepository;
+        this.cuentaRepository = cuentaRepository;
         this.empleadoRepository = empleadoRepository;
         this.prestamoRepository = prestamoRepository;
     }
 
     @PostMapping("/gerencia/clientes")
+    @Transactional
     public String crearCliente(
             @RequestParam final String nombre,
             @RequestParam final String dui,
@@ -46,9 +54,19 @@ public class GerenciaController {
             cliente.setDui(dui.trim());
             cliente.setSalario(salario.max(BigDecimal.ZERO));
             cliente.setEstado(normalizarEstado(estado, "ACTIVO"));
-            clienteRepository.save(cliente);
+            final Cliente clienteGuardado = clienteRepository.save(cliente);
+
+            final Cuenta cuentaBase = new Cuenta();
+            cuentaBase.setCliente(clienteGuardado);
+            cuentaBase.setTipo("AHORROS");
+            cuentaBase.setSaldo(BigDecimal.ZERO);
+            cuentaBase.setFechaCreacion(LocalDate.now());
+            cuentaBase.setNumeroCuenta(generarNumeroCuenta(clienteGuardado.getId()));
+            cuentaRepository.save(cuentaBase);
+
             redirectAttributes.addFlashAttribute("toastMessage", "Cliente creado correctamente.");
         } catch (RuntimeException exception) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             redirectAttributes.addFlashAttribute("toastMessage", "No se pudo crear el cliente: revisa DUI y datos.");
         }
         return "redirect:/gerencia/clientes";
@@ -193,5 +211,10 @@ public class GerenciaController {
             case "EN CAPACITACION", "EN CAPACITACIÓN" -> "EN CAPACITACION";
             default -> estado.trim().toUpperCase();
         };
+    }
+
+    private String generarNumeroCuenta(final Integer idCliente) {
+        final String correlativo = String.format("%08d", idCliente == null ? 0 : idCliente);
+        return "AHO-" + correlativo;
     }
 }
