@@ -1,105 +1,259 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aprobación de Créditos | Panel Gerencia</title>
+
     <link rel="stylesheet" th:href="@{/css/app-shell.css}">
     <link rel="stylesheet" th:href="@{/css/aprobacion-creditos.css}">
 </head>
+
 <body>
-<div class="app-shell">
-    <header th:replace="~{layout/fragments :: topbar}"></header>
-    <aside th:replace="~{layout/fragments :: sidebar('aprobacion-creditos')}"></aside>
 
-    <main class="content">
-        <h1>Aprobación de Créditos</h1>
-        <p class="subtitle">Revisión y decisión de solicitudes de préstamo</p>
+    <div class="app-shell">
 
-        <section class="credit-layout">
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Cliente</th>
-                        <th>DUI</th>
-                        <th>Monto</th>
-                        <th>Plazo</th>
-                        <th>Interés</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:if="${#lists.isEmpty(prestamosGerencia)}" class="empty-row">
-                        <td colspan="7">No hay solicitudes de crédito registradas.</td>
-                    </tr>
-                    <tr th:each="prestamo : ${prestamosGerencia}">
-                        <td th:text="${prestamo.cliente.nombre}">Cliente</td>
-                        <td th:text="${prestamo.cliente.dui}">00000000-0</td>
-                        <td th:text="${'$' + #numbers.formatDecimal(prestamo.monto, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
-                        <td th:text="${prestamo.aniosPago != null ? prestamo.aniosPago + ' años' : T(java.lang.Math).max(1, T(java.lang.Math).round(prestamo.plazoMeses / 12.0)) + ' años'}">1 años</td>
-                        <td th:text="${prestamo.interes + '%'}">0%</td>
-                        <td>
-                            <span class="badge"
-                                  th:classappend="${
-                                      prestamo.estado != null and (prestamo.estado.equalsIgnoreCase('APROBADO') or prestamo.estado.equalsIgnoreCase('ACTIVO'))
+        <header th:replace="~{layout/fragments :: topbar}"></header>
+
+        <aside th:replace="~{layout/fragments :: sidebar('aprobacion-creditos')}"></aside>
+
+        <main class="content">
+
+            <h1>Aprobación de Créditos</h1>
+
+            <p class="subtitle">
+                Revisión y decisión de solicitudes de préstamo
+            </p>
+
+            <section class="credit-layout">
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>DUI</th>
+                                <th>Monto</th>
+                                <th>Plazo</th>
+                                <th>Interés</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr th:if="${#lists.isEmpty(prestamosGerencia)}" class="empty-row">
+
+                                <td colspan="7">
+                                    No hay solicitudes de crédito registradas.
+                                </td>
+
+                            </tr>
+
+                            <tr th:each="prestamo : ${prestamosGerencia}">
+
+                                <td th:text="${prestamo.cliente.nombre}">
+                                    Cliente
+                                </td>
+
+                                <td th:text="${prestamo.cliente.dui}">
+                                    00000000-0
+                                </td>
+
+                                <td th:text="${'$' + #numbers.formatDecimal(prestamo.monto, 1, 'COMMA', 2, 'POINT')}">
+                                    $0.00
+                                </td>
+
+                                <!-- ESTA ES LA PARTE CORREGIDA -->
+                                <td th:text="${prestamo.aniosPago != null ? prestamo.aniosPago + ' años' : '1 año'}">
+                                    1 año
+                                </td>
+
+                                <td th:text="${prestamo.interes + '%'}">
+                                    0%
+                                </td>
+
+                                <td>
+
+                                    <span class="badge" th:classappend="${
+                                      prestamo.estado != null and
+                                      (prestamo.estado.equalsIgnoreCase('APROBADO')
+                                      or prestamo.estado.equalsIgnoreCase('ACTIVO'))
+
                                       ? ' approved'
-                                      : (prestamo.estado != null and prestamo.estado.equalsIgnoreCase('RECHAZADO') ? ' rejected' : ' pending')
-                                  }"
-                                  th:text="${prestamo.estado}">Estado</span>
-                        </td>
-                        <td class="action-cell">
-                            <a class="link-btn" th:href="@{/gerencia/aprobacion-creditos(prestamoId=${prestamo.idPrestamo})}">Ver</a>
-                            <span class="divider"
-                                  th:if="${prestamo.estado == null or prestamo.estado.equalsIgnoreCase('EN ESPERA') or prestamo.estado.equalsIgnoreCase('PENDIENTE')}">|</span>
-                            <form th:if="${prestamo.estado == null or prestamo.estado.equalsIgnoreCase('EN ESPERA') or prestamo.estado.equalsIgnoreCase('PENDIENTE')}"
-                                  th:action="@{/gerencia/aprobacion-creditos/{id}/estado(id=${prestamo.idPrestamo})}"
-                                  method="post"
-                                  class="inline-form">
-                                <input type="hidden" name="estado" value="APROBADO">
-                                <button type="submit" class="link-btn approve">Aprobar</button>
-                            </form>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
 
-            <aside class="decision-card">
-                <h2>Panel de Decisión</h2>
-                <p class="subtitle"
-                   th:text="${prestamoSeleccionado != null ? 'Solicitud seleccionada: ' + prestamoSeleccionado.cliente.nombre : 'Sin solicitudes para revisar'}">
-                    Solicitud seleccionada
-                </p>
+                                      : (prestamo.estado != null and
+                                      prestamo.estado.equalsIgnoreCase('RECHAZADO')
 
-                <ul th:if="${prestamoSeleccionado != null}">
-                    <li><strong>DUI:</strong> <span th:text="${prestamoSeleccionado.cliente.dui}">00000000-0</span></li>
-                    <li><strong>Monto:</strong> <span th:text="${'$' + #numbers.formatDecimal(prestamoSeleccionado.monto, 1, 'COMMA', 2, 'POINT')}">$0.00</span></li>
-                    <li><strong>Plazo:</strong> <span th:text="${prestamoSeleccionado.plazoMeses + ' meses'}">0 meses</span></li>
-                    <li><strong>Interés:</strong> <span th:text="${prestamoSeleccionado.interes + '%'}">0%</span></li>
-                    <li><strong>Estado:</strong> <span th:text="${prestamoSeleccionado.estado}">Estado</span></li>
-                </ul>
-                <ul th:if="${prestamoSeleccionado == null}">
-                    <li>No hay datos para decisión en este momento.</li>
-                </ul>
+                                      ? ' rejected'
 
-                <div class="decision-actions" th:if="${prestamoSeleccionado != null}">
-                    <form th:action="@{/gerencia/aprobacion-creditos/{id}/estado(id=${prestamoSeleccionado.idPrestamo})}" method="post">
-                        <input type="hidden" name="estado" value="RECHAZADO">
-                        <button type="submit" class="btn-reject" id="reject-credit">Rechazar</button>
-                    </form>
-                    <form th:action="@{/gerencia/aprobacion-creditos/{id}/estado(id=${prestamoSeleccionado.idPrestamo})}" method="post">
-                        <input type="hidden" name="estado" value="APROBADO">
-                        <button type="submit" class="btn-approve" id="approve-credit">Aprobar</button>
-                    </form>
+                                      : ' pending')
+                                  }" th:text="${prestamo.estado}">
+
+                                        Estado
+
+                                    </span>
+
+                                </td>
+
+                                <td class="action-cell">
+
+                                    <a class="link-btn"
+                                        th:href="@{/gerencia/aprobacion-creditos(prestamoId=${prestamo.idPrestamo})}">
+
+                                        Ver
+
+                                    </a>
+
+                                    <span class="divider" th:if="${prestamo.estado == null
+                                  or prestamo.estado.equalsIgnoreCase('EN ESPERA')
+                                  or prestamo.estado.equalsIgnoreCase('PENDIENTE')}">
+
+                                        |
+
+                                    </span>
+
+                                    <form th:if="${prestamo.estado == null
+                                  or prestamo.estado.equalsIgnoreCase('EN ESPERA')
+                                  or prestamo.estado.equalsIgnoreCase('PENDIENTE')}"
+                                        th:action="@{/gerencia/aprobacion-creditos/{id}(id=${prestamo.idPrestamo})}"
+                                        method="post" class="inline-form">
+
+                                        <input type="hidden" name="estado" value="APROBADO">
+
+                                        <button type="submit" class="link-btn approve">
+
+                                            Aprobar
+
+                                        </button>
+
+                                    </form>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
                 </div>
-            </aside>
-        </section>
-    </main>
-</div>
 
-<div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}"></div>
-<script th:src="@{/js/app-shell.js}"></script>
+                <aside class="decision-card">
+
+                    <h2>Panel de Decisión</h2>
+
+                    <p class="subtitle" th:text="${prestamoSeleccionado != null
+                   ? 'Solicitud seleccionada: ' + prestamoSeleccionado.cliente.nombre
+                   : 'Sin solicitudes para revisar'}">
+
+                        Solicitud seleccionada
+
+                    </p>
+
+                    <ul th:if="${prestamoSeleccionado != null}">
+
+                        <li>
+                            <strong>DUI:</strong>
+
+                            <span th:text="${prestamoSeleccionado.cliente.dui}">
+                                00000000-0
+                            </span>
+                        </li>
+
+                        <li>
+                            <strong>Monto:</strong>
+
+                            <span
+                                th:text="${'$' + #numbers.formatDecimal(prestamoSeleccionado.monto, 1, 'COMMA', 2, 'POINT')}">
+                                $0.00
+                            </span>
+                        </li>
+
+                        <li>
+                            <strong>Plazo:</strong>
+
+                            <span th:text="${prestamoSeleccionado.plazoMeses + ' meses'}">
+                                0 meses
+                            </span>
+                        </li>
+
+                        <li>
+                            <strong>Interés:</strong>
+
+                            <span th:text="${prestamoSeleccionado.interes + '%'}">
+                                0%
+                            </span>
+                        </li>
+
+                        <li>
+                            <strong>Estado:</strong>
+
+                            <span th:text="${prestamoSeleccionado.estado}">
+                                Estado
+                            </span>
+                        </li>
+
+                    </ul>
+
+                    <ul th:if="${prestamoSeleccionado == null}">
+
+                        <li>
+                            No hay datos para decisión en este momento.
+                        </li>
+
+                    </ul>
+
+                    <div class="decision-actions" th:if="${prestamoSeleccionado != null}">
+
+                        <form
+                            th:action="@{/gerencia/aprobacion-creditos/{id}/estado(id=${prestamoSeleccionado.idPrestamo})}"
+                            method="post">
+
+                            <input type="hidden" name="estado" value="RECHAZADO">
+
+                            <button type="submit" class="btn-reject" id="reject-credit">
+
+                                Rechazar
+
+                            </button>
+
+                        </form>
+
+                        <form
+                            th:action="@{/gerencia/aprobacion-creditos/{id}/estado(id=${prestamoSeleccionado.idPrestamo})}"
+                            method="post">
+
+                            <input type="hidden" name="estado" value="APROBADO">
+
+                            <button type="submit" class="btn-approve" id="approve-credit">
+
+                                Aprobar
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </aside>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}">
+
+    </div>
+
+    <script th:src="@{/js/app-shell.js}"></script>
+
 </body>
+
 </html>

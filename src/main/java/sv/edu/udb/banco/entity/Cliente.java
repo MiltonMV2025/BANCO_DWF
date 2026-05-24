@@ -1,5 +1,6 @@
 package sv.edu.udb.banco.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,15 +17,11 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table(
-        name = "cliente",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "UQ_CLIENTE_DUI", columnNames = "dui")
-        },
-        indexes = {
-                @Index(name = "IX_CLIENTE_ESTADO", columnList = "estado")
-        }
-)
+@Table(name = "cliente", uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_CLIENTE_DUI", columnNames = "dui")
+}, indexes = {
+        @Index(name = "IX_CLIENTE_ESTADO", columnList = "estado")
+})
 public class Cliente {
 
     @Id
@@ -44,12 +41,15 @@ public class Cliente {
     @Column(name = "estado", nullable = false, length = 20)
     private String estado;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "cliente", fetch = FetchType.LAZY)
     private Set<Cuenta> cuentas = new LinkedHashSet<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "cliente", fetch = FetchType.LAZY)
     private Set<Prestamo> prestamos = new LinkedHashSet<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "cliente", fetch = FetchType.LAZY)
     private Set<Movimiento> movimientos = new LinkedHashSet<>();
 
