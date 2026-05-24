@@ -1,6 +1,7 @@
 package sv.edu.udb.banco.controller;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import sv.edu.udb.banco.entity.Cliente;
 import sv.edu.udb.banco.entity.Cuenta;
+import sv.edu.udb.banco.entity.Empleado;
 import sv.edu.udb.banco.entity.Movimiento;
 import sv.edu.udb.banco.entity.Prestamo;
 import sv.edu.udb.banco.repository.ClienteRepository;
@@ -19,6 +21,7 @@ import sv.edu.udb.banco.repository.PrestamoRepository;
 import sv.edu.udb.banco.service.TransferenciaService;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -201,6 +204,110 @@ public class HomeController {
         final List<Prestamo> prestamos = prestamoRepository.findAllByOrderByIdPrestamoDesc();
         model.addAttribute("prestamos", prestamos);
         return "pages/prestamos";
+    }
+
+    @PostMapping("/prestamos")
+    public String crearPrestamo(
+            @RequestParam final BigDecimal monto,
+            @RequestParam final String dui,
+            final RedirectAttributes redirectAttributes,
+            final Authentication authentication
+    ) {
+        try {
+            if (monto == null || monto.compareTo(BigDecimal.ZERO) <= 0) {
+                redirectAttributes.addFlashAttribute("toastMessage", "El monto debe ser mayor a 0.");
+                return "redirect:/prestamos";
+            }
+
+            if (dui == null || dui.isBlank()) {
+                redirectAttributes.addFlashAttribute("toastMessage", "Debes ingresar un DUI válido.");
+                return "redirect:/prestamos";
+            }
+
+            final Optional<Cliente> clienteOpt = clienteRepository.findByDui(dui.trim());
+            if (clienteOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("toastMessage", "Cliente no encontrado por DUI.");
+                return "redirect:/prestamos";
+            }
+
+            final Cliente cliente = clienteOpt.get();
+            final BigDecimal salario = cliente.getSalario() == null ? BigDecimal.ZERO : cliente.getSalario();
+
+            final BigDecimal interes;
+            final BigDecimal maximo;
+
+            if (salario.compareTo(new BigDecimal("365")) < 0) {
+                interes = new BigDecimal("0.03");
+                maximo = new BigDecimal("10000");
+            } else if (salario.compareTo(new BigDecimal("600")) < 0) {
+                interes = new BigDecimal("0.03");
+                maximo = new BigDecimal("25000");
+            } else if (salario.compareTo(new BigDecimal("900")) < 0) {
+                interes = new BigDecimal("0.04");
+                maximo = new BigDecimal("35000");
+            } else if (salario.compareTo(new BigDecimal("1000")) >= 0) {
+                interes = new BigDecimal("0.05");
+                maximo = new BigDecimal("50000");
+            } else {
+                redirectAttributes.addFlashAttribute("toastMessage", "Rango salarial entre 900 y 999.99 no definido.");
+                return "redirect:/prestamos";
+            }
+
+            if (monto.compareTo(maximo) > 0) {
+                redirectAttributes.addFlashAttribute("toastMessage", "Monto excede el máximo permitido: $" + maximo + ".");
+                return "redirect:/prestamos";
+            }
+
+            final BigDecimal cuotaMaxima = salario.multiply(new BigDecimal("0.30")).setScale(2, RoundingMode.HALF_UP);
+            if (cuotaMaxima.compareTo(BigDecimal.ZERO) <= 0) {
+                redirectAttributes.addFlashAttribute("toastMessage", "No se puede calcular cuota con salario actual.");
+                return "redirect:/prestamos";
+            }
+
+            final BigDecimal totalConInteres = monto.multiply(BigDecimal.ONE.add(interes));
+            int plazoMeses = totalConInteres.divide(cuotaMaxima, 0, RoundingMode.CEILING).intValue();
+            if (plazoMeses < 1) {
+                plazoMeses = 1;
+            }
+
+            final BigDecimal cuotaMensual = totalConInteres
+                    .divide(BigDecimal.valueOf(plazoMeses), 2, RoundingMode.HALF_UP);
+
+            if (cuotaMensual.compareTo(cuotaMaxima) > 0) {
+                redirectAttributes.addFlashAttribute("toastMessage", "La cuota mensual supera el 30% del salario.");
+                return "redirect:/prestamos";
+            }
+
+            final BigDecimal aniosPago = BigDecimal.valueOf(plazoMeses)
+                    .divide(new BigDecimal("12"), 2, RoundingMode.HALF_UP);
+
+            final Empleado empleadoAsignado = empleadoRepository.findAll().stream()
+                    .filter(empleado -> empleado.getEstado() != null && empleado.getEstado().equalsIgnoreCase("ACTIVO"))
+                    .findFirst()
+                    .orElse(null);
+
+            if (empleadoAsignado == null) {
+                redirectAttributes.addFlashAttribute("toastMessage", "No hay empleado activo para asignar la solicitud.");
+                return "redirect:/prestamos";
+            }
+
+            final Prestamo prestamo = new Prestamo();
+            prestamo.setCliente(cliente);
+            prestamo.setEmpleado(empleadoAsignado);
+            prestamo.setMonto(monto.setScale(2, RoundingMode.HALF_UP));
+            prestamo.setInteres(interes);
+            prestamo.setPlazoMeses(plazoMeses);
+            prestamo.setCuotaMensual(cuotaMensual);
+            prestamo.setAniosPago(aniosPago);
+            prestamo.setEstado("EN ESPERA");
+
+            prestamoRepository.save(prestamo);
+            redirectAttributes.addFlashAttribute("toastMessage", "Solicitud enviada. Estado inicial: EN ESPERA.");
+        } catch (RuntimeException exception) {
+            redirectAttributes.addFlashAttribute("toastMessage", "No se pudo crear el préstamo.");
+        }
+
+        return "redirect:/prestamos";
     }
 
     @GetMapping("/pagos")
