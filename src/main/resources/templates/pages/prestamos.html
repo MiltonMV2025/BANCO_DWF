@@ -76,52 +76,54 @@
             <h2>Nueva Solicitud de Préstamo</h2>
             <p class="subtitle">Completa tu solicitud y quedará pendiente de aprobación de gerencia</p>
 
-            <div class="open-loan-grid">
-                <div class="loan-form-column">
-                    <div class="field-group">
-                        <label for="loan-purpose">Destino del préstamo</label>
-                        <select id="loan-purpose">
-                            <option>Capital de trabajo</option>
-                            <option>Compra de equipo</option>
-                            <option>Mejora de vivienda</option>
-                        </select>
+            <form th:action="@{/prestamos}" method="post">
+                <div class="open-loan-grid">
+                    <div class="loan-form-column">
+                        <div class="field-group">
+                            <label for="loan-purpose">Destino del préstamo</label>
+                            <select id="loan-purpose" name="destino">
+                                <option value="Capital de trabajo">Capital de trabajo</option>
+                                <option value="Compra de equipo">Compra de equipo</option>
+                                <option value="Mejora de vivienda">Mejora de vivienda</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="loan-amount">Monto solicitado</label>
+                            <input id="loan-amount" name="monto" type="number" min="0.01" step="0.01" placeholder="$ 0.00" required>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="loan-dui">DUI del cliente</label>
+                            <input id="loan-dui" name="dui" type="text" placeholder="00000000-0" required>
+                        </div>
                     </div>
 
-                    <div class="field-group">
-                        <label for="loan-amount">Monto solicitado</label>
-                        <input id="loan-amount" type="number" min="0" step="0.01" placeholder="$ 0.00">
+                    <div class="loan-form-column">
+                        <article class="rules-card">
+                            <p class="rules-title">Política de evaluación:</p>
+                            <ul>
+                                <li>La solicitud se revisa por gerencia de créditos.</li>
+                                <li>Se valida historial, ingresos y nivel de endeudamiento.</li>
+                                <li>El resultado puede ser: Aprobado, En espera o Rechazado.</li>
+                            </ul>
+                        </article>
+
+                        <div class="field-group">
+                            <label for="monthly-fee">Cuota mensual estimada</label>
+                            <input id="monthly-fee" type="text" value="" readonly>
+                        </div>
                     </div>
                 </div>
 
-                <div class="loan-form-column">
-                    <div class="field-group">
-                        <label for="term">Plazo (años)</label>
-                        <input id="term" type="number" min="1" max="30" value="1">
-                    </div>
-
-                    <article class="rules-card">
-                        <p class="rules-title">Política de evaluación:</p>
-                        <ul>
-                            <li>La solicitud se revisa por gerencia de créditos.</li>
-                            <li>Se valida historial, ingresos y nivel de endeudamiento.</li>
-                            <li>El resultado puede ser: Aprobado, En espera o Rechazado.</li>
-                        </ul>
-                    </article>
-
-                    <div class="field-group">
-                        <label for="monthly-fee">Cuota mensual estimada</label>
-                        <input id="monthly-fee" type="text" value="" readonly>
-                    </div>
-                </div>
-            </div>
-
-            <button type="button" class="btn-open-loan" id="open-loan-case">Enviar Solicitud</button>
+                <button type="submit" class="btn-open-loan" id="open-loan-case">Enviar Solicitud</button>
+            </form>
             <p class="disclaimer">La gerencia te notificará el estado de tu solicitud</p>
         </section>
     </main>
 </div>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}"></div>
 
 <script th:src="@{/js/app-shell.js}"></script>
 <script th:src="@{/js/prestamos.js}"></script>

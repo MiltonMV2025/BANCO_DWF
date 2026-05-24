@@ -2,21 +2,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const detailButtons = document.querySelectorAll(".link-btn:not(.cancel-btn)");
     const cancelButtons = document.querySelectorAll(".cancel-btn");
-    const openCaseButton = document.getElementById("open-loan-case");
     const loanAmount = document.getElementById("loan-amount");
-    const termInput = document.getElementById("term");
     const monthlyFee = document.getElementById("monthly-fee");
     const newLoanBtn = document.getElementById("new-loan-btn");
 
     const calculateFee = () => {
 
         const amount = Number(loanAmount?.value || 0);
+<<<<<<< HEAD
         const years = Math.max(Number(termInput?.value || 1), 1);
 
         const monthly = amount > 0
             ? amount / (years * 12)
             : 0;
 
+=======
+        const monthly = amount > 0 ? amount / 12 : 0;
+>>>>>>> a8790017ec9f2e27a56aa6193773adb3675c8209
         if (monthlyFee) {
 
             monthlyFee.value = monthly > 0
@@ -45,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+<<<<<<< HEAD
     openCaseButton?.addEventListener("click", async () => {
 
         const monto = Number(loanAmount.value);
@@ -98,6 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+=======
+>>>>>>> a8790017ec9f2e27a56aa6193773adb3675c8209
     newLoanBtn?.addEventListener("click", () => {
 
         document.querySelector(".open-loan-section")
@@ -108,7 +113,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     loanAmount?.addEventListener("input", calculateFee);
-    termInput?.addEventListener("input", calculateFee);
 
     calculateFee();
 });
