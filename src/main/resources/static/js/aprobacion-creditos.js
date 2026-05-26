@@ -2,11 +2,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const approveLinks = document.querySelectorAll(".link-btn.approve");
     const rejectButton = document.getElementById("reject-credit");
     const approveButton = document.getElementById("approve-credit");
-    const viewLinks = document.querySelectorAll(".link-btn:not(.approve)");
+    const viewLinks = document.querySelectorAll(".view-detail-btn");
+    const decisionCard = document.getElementById("decision-card");
 
-    viewLinks.forEach((button) => {
-        button.addEventListener("click", () => {
-            window.showUiToast?.("Detalle de solicitud en modo visual.");
+    const showDetailLoading = () => {
+        decisionCard?.classList.add("loading");
+    };
+
+    viewLinks.forEach((link) => {
+        link.addEventListener("click", (event) => {
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            if (event.button !== 0) return;
+
+            const href = link.getAttribute("href");
+            if (!href) return;
+
+            event.preventDefault();
+            showDetailLoading();
+            window.showUiToast?.("Cargando detalle de solicitud...");
+
+            requestAnimationFrame(() => {
+                window.location.assign(href);
+            });
         });
     });
 

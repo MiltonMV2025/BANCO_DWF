@@ -53,7 +53,8 @@
                     th:attr="data-id=${empleado.idEmpleado},
                              data-nombre=${empleado.nombre},
                              data-rol=${empleado.rol},
-                             data-estado=${empleado.estado}">
+                             data-estado=${empleado.estado},
+                             data-prestamos=${empleado.prestamosAsignados}">
                     <td th:text="${empleado.nombre}">Nombre</td>
                     <td th:text="${empleado.rol}">Cargo</td>
                     <td th:text="${empleado.prestamosAsignados}">0</td>
@@ -77,6 +78,52 @@
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}"></div>
+
+<div class="modal-backdrop" id="employee-profile-modal" aria-hidden="true">
+    <div class="modal-card profile-modal-card">
+        <div class="profile-header">
+            <div class="profile-avatar" id="employee-profile-avatar">EM</div>
+            <div>
+                <h2 class="modal-title" id="employee-profile-name">Ficha de empleado</h2>
+                <p class="modal-subtitle" id="employee-profile-tagline">Detalle operativo y de contacto</p>
+            </div>
+        </div>
+
+        <div class="profile-grid">
+            <div class="profile-item">
+                <span class="profile-label">Cargo</span>
+                <strong id="employee-profile-role">Analista</strong>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Estado</span>
+                <strong id="employee-profile-status">ACTIVO</strong>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Préstamos asignados</span>
+                <strong id="employee-profile-loans">0</strong>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Turno</span>
+                <strong id="employee-profile-shift">Matutino</strong>
+            </div>
+            <div class="profile-item profile-item-wide">
+                <span class="profile-label">Sucursal</span>
+                <strong id="employee-profile-branch">Sucursal Centro</strong>
+            </div>
+        </div>
+
+        <div class="profile-mock">
+            <h3>Información adicional</h3>
+            <p id="employee-profile-email">empleado@banco.com</p>
+            <p id="employee-profile-phone">+503 7111-1111</p>
+            <p id="employee-profile-joined">Ingreso: 2022-01-15</p>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-primary" id="employee-profile-close">Cerrar</button>
+        </div>
+    </div>
+</div>
 
 <div class="modal-backdrop" id="employee-modal" aria-hidden="true">
     <div class="modal-card">

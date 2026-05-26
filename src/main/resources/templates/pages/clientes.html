@@ -56,7 +56,9 @@
                              data-nombre=${cliente.nombre},
                              data-dui=${cliente.dui},
                              data-salario=${cliente.salario},
-                             data-estado=${cliente.estado}">
+                             data-estado=${cliente.estado},
+                             data-cuentas=${cliente.totalCuentas},
+                             data-saldo=${cliente.saldoTotal}">
                     <td th:text="${cliente.nombre}">Nombre</td>
                     <td th:text="${cliente.dui}">00000000-0</td>
                     <td th:text="${cliente.totalCuentas}">0</td>
@@ -81,6 +83,52 @@
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}"></div>
+
+<div class="modal-backdrop" id="client-profile-modal" aria-hidden="true">
+    <div class="modal-card profile-modal-card">
+        <div class="profile-header">
+            <div class="profile-avatar" id="client-profile-avatar">CL</div>
+            <div>
+                <h2 class="modal-title" id="client-profile-name">Perfil de cliente</h2>
+                <p class="modal-subtitle" id="client-profile-tagline">Ficha de información</p>
+            </div>
+        </div>
+
+        <div class="profile-grid">
+            <div class="profile-item">
+                <span class="profile-label">DUI</span>
+                <strong id="client-profile-dui">00000000-0</strong>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Estado</span>
+                <strong id="client-profile-status">ACTIVO</strong>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Salario</span>
+                <strong id="client-profile-salary">$0.00</strong>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Cuentas activas</span>
+                <strong id="client-profile-accounts">0</strong>
+            </div>
+            <div class="profile-item profile-item-wide">
+                <span class="profile-label">Saldo total</span>
+                <strong id="client-profile-balance">$0.00</strong>
+            </div>
+        </div>
+
+        <div class="profile-mock">
+            <h3>Información adicional</h3>
+            <p id="client-profile-email">cliente@banco.com</p>
+            <p id="client-profile-phone">+503 7000-0000</p>
+            <p id="client-profile-manager">Gestor asignado: Ejecutivo Comercial</p>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-primary" id="client-profile-close">Cerrar</button>
+        </div>
+    </div>
+</div>
 
 <div class="modal-backdrop" id="client-modal" aria-hidden="true">
     <div class="modal-card">

@@ -102,7 +102,7 @@
 
                                 <td class="action-cell">
 
-                                    <a class="link-btn"
+                                    <a class="link-btn view-detail-btn"
                                         th:href="@{/gerencia/aprobacion-creditos(prestamoId=${prestamo.idPrestamo})}">
 
                                         Ver
@@ -143,10 +143,11 @@
 
                 </div>
 
-                <aside class="decision-card">
+                <aside class="decision-card" id="decision-card">
 
                     <h2>Panel de Decisión</h2>
 
+                    <div class="decision-card-content">
                     <p class="subtitle" th:text="${prestamoSeleccionado != null
                    ? 'Solicitud seleccionada: ' + prestamoSeleccionado.cliente.nombre
                    : 'Sin solicitudes para revisar'}">
@@ -239,6 +240,19 @@
                         </form>
 
                     </div>
+                    </div>
+
+                    <div class="decision-panel-skeleton" aria-hidden="true">
+                        <div class="skeleton-line skeleton-title"></div>
+                        <div class="skeleton-line skeleton-subtitle"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-actions">
+                            <div class="skeleton-line skeleton-button"></div>
+                            <div class="skeleton-line skeleton-button"></div>
+                        </div>
+                    </div>
 
                 </aside>
 
@@ -253,6 +267,7 @@
     </div>
 
     <script th:src="@{/js/app-shell.js}"></script>
+    <script th:src="@{/js/aprobacion-creditos.js}"></script>
 
 </body>
 
