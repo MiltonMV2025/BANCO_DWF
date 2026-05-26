@@ -24,7 +24,7 @@
                         <div class="dui-search-row">
                             <div class="dui-input-wrap">
                                 <i class="bi bi-search" aria-hidden="true"></i>
-                                <input id="dui-search" name="dui" type="text" th:value="${duiBusqueda}" placeholder="00000000-0">
+                                <input id="dui-search" name="dui" type="text" required maxlength="10" minlength="10" pattern="\d{8}-\d" inputmode="numeric" autocomplete="off" th:value="${duiBusqueda}" placeholder="00000000-0">
                             </div>
                             <button type="submit" class="btn-outline">Buscar</button>
                         </div>
@@ -212,6 +212,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}"></div>
 
 <script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/dui-mask.js}"></script>
 <script th:src="@{/js/transferencias.js}"></script>
 </body>
 </html>

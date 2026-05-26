@@ -17,6 +17,7 @@ import java.util.Set;
 @Table(
         name = "empleado",
         indexes = {
+                @Index(name = "IX_EMPLEADO_DUI", columnList = "dui"),
                 @Index(name = "IX_EMPLEADO_ESTADO", columnList = "estado")
         }
 )
@@ -29,6 +30,9 @@ public class Empleado {
 
     @Column(name = "nombre", nullable = false, length = 120)
     private String nombre;
+
+    @Column(name = "dui", nullable = false, length = 10, unique = true)
+    private String dui;
 
     @Column(name = "rol", nullable = false, length = 50)
     private String rol;
@@ -53,6 +57,14 @@ public class Empleado {
 
     public void setNombre(final String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getDui() {
+        return dui;
+    }
+
+    public void setDui(final String dui) {
+        this.dui = dui;
     }
 
     public String getRol() {
