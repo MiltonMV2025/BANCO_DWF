@@ -38,6 +38,11 @@ document.addEventListener("DOMContentLoaded", () => {
         modal?.setAttribute("aria-hidden", "true");
     };
 
+    const isValidDui = (value) => {
+        const digits = (value ?? "").replace(/\D/g, "");
+        return digits.length === 9;
+    };
+
     const resetForm = () => {
         clientForm?.setAttribute("action", "/gerencia/clientes");
         nameInput.value = "";
@@ -137,6 +142,12 @@ document.addEventListener("DOMContentLoaded", () => {
             window.showUiToast?.("Completa los campos requeridos.");
             return;
         }
+
+        if (!isValidDui(duiInput.value)) {
+            window.showUiToast?.("Ingresá un DUI válido.");
+            return;
+        }
+
         clientForm.submit();
     });
 

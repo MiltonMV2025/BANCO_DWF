@@ -13,18 +13,22 @@ import sv.edu.udb.banco.entity.Cuenta;
 import sv.edu.udb.banco.entity.Empleado;
 import sv.edu.udb.banco.entity.Movimiento;
 import sv.edu.udb.banco.entity.Prestamo;
+import sv.edu.udb.banco.entity.Rol;
 import sv.edu.udb.banco.repository.ClienteRepository;
 import sv.edu.udb.banco.repository.CuentaRepository;
 import sv.edu.udb.banco.repository.EmpleadoRepository;
 import sv.edu.udb.banco.repository.MovimientoRepository;
 import sv.edu.udb.banco.repository.PrestamoRepository;
+import sv.edu.udb.banco.repository.RolRepository;
 import sv.edu.udb.banco.service.TransferenciaService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 public class HomeController {
@@ -35,6 +39,7 @@ public class HomeController {
     private final CuentaRepository cuentaRepository;
     private final MovimientoRepository movimientoRepository;
     private final TransferenciaService transferenciaService;
+    private final RolRepository rolRepository;
 
     public HomeController(
             final ClienteRepository clienteRepository,
@@ -42,7 +47,8 @@ public class HomeController {
             final PrestamoRepository prestamoRepository,
             final CuentaRepository cuentaRepository,
             final MovimientoRepository movimientoRepository,
-            final TransferenciaService transferenciaService
+            final TransferenciaService transferenciaService,
+            final RolRepository rolRepository
     ) {
         this.clienteRepository = clienteRepository;
         this.empleadoRepository = empleadoRepository;
@@ -50,6 +56,7 @@ public class HomeController {
         this.cuentaRepository = cuentaRepository;
         this.movimientoRepository = movimientoRepository;
         this.transferenciaService = transferenciaService;
+        this.rolRepository = rolRepository;
     }
 
     @GetMapping("/home")
@@ -336,7 +343,13 @@ public class HomeController {
             final Model model
     ) {
         final String estadoNormalizado = normalizarFiltroEstado(estado);
+        final List<Rol> rolesActivos = rolRepository.findAllByEstadoOrderByNombreAsc("A");
+        final Map<String, String> nombresRolPorCodigo = rolesActivos.stream()
+                .collect(Collectors.toMap(Rol::getCodigo, Rol::getNombre, (anterior, siguiente) -> anterior));
+
         model.addAttribute("empleados", empleadoRepository.findResumenGerencia(q, estadoNormalizado));
+        model.addAttribute("rolesEmpleado", rolesActivos);
+        model.addAttribute("rolesEmpleadoMap", nombresRolPorCodigo);
         model.addAttribute("qEmpleados", q == null ? "" : q);
         model.addAttribute("estadoEmpleados", estado == null ? "" : estado);
         return "pages/empleados";
