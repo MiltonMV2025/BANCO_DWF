@@ -6,8 +6,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalTitle = document.getElementById("employee-modal-title");
     const employeeForm = document.getElementById("employee-form");
     const nameInput = document.getElementById("employee-name");
+    const duiInput = document.getElementById("employee-dui");
     const roleInput = document.getElementById("employee-role");
+    const passwordInput = document.getElementById("employee-password");
+    const passwordConfirmInput = document.getElementById("employee-password-confirm");
     const statusInput = document.getElementById("employee-status");
+    const usernameNote = document.getElementById("employee-username-note");
     const saveButton = document.getElementById("employee-save");
     const cancelButton = document.getElementById("employee-cancel");
     const deleteCancel = document.getElementById("employee-delete-cancel");
@@ -18,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const profileAvatar = document.getElementById("employee-profile-avatar");
     const profileName = document.getElementById("employee-profile-name");
     const profileTagline = document.getElementById("employee-profile-tagline");
+    const profileUsername = document.getElementById("employee-profile-username");
     const profileRole = document.getElementById("employee-profile-role");
     const profileStatus = document.getElementById("employee-profile-status");
     const profileLoans = document.getElementById("employee-profile-loans");
@@ -26,6 +31,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const profileEmail = document.getElementById("employee-profile-email");
     const profilePhone = document.getElementById("employee-profile-phone");
     const profileJoined = document.getElementById("employee-profile-joined");
+
+    const roleNameByCode = new Map(
+        Array.from(roleInput?.options ?? [])
+            .map((option) => [option.value, option.textContent?.trim() ?? option.value])
+    );
+
+    const isValidDui = (value) => {
+        const digits = (value ?? "").replace(/\D/g, "");
+        return digits.length === 9;
+    };
 
     const openModal = (modal) => {
         modal?.classList.add("show");
@@ -37,10 +52,35 @@ document.addEventListener("DOMContentLoaded", () => {
         modal?.setAttribute("aria-hidden", "true");
     };
 
+    const normalizeRoleCode = (value) => {
+        const role = (value ?? "").trim();
+        if (!role) return "";
+        if (roleNameByCode.has(role)) return role;
+        for (const [code, name] of roleNameByCode.entries()) {
+            if (name.toLowerCase() === role.toLowerCase()) {
+                return code;
+            }
+        }
+        return role;
+    };
+
+    const resolveRoleLabel = (value) => {
+        const roleCode = normalizeRoleCode(value);
+        return roleNameByCode.get(roleCode) ?? value ?? "Sin rol";
+    };
+
     const resetForm = () => {
         employeeForm?.setAttribute("action", "/gerencia/empleados");
         nameInput.value = "";
+        duiInput.value = "";
         roleInput.value = "";
+        passwordInput.value = "";
+        passwordConfirmInput.value = "";
+        passwordInput.required = true;
+        passwordConfirmInput.required = true;
+        passwordInput.placeholder = "Mínimo 6 caracteres";
+        passwordConfirmInput.placeholder = "Repite la contraseña";
+        usernameNote.textContent = "Usuario de acceso: se utilizará este DUI para iniciar sesión.";
         statusInput.value = "ACTIVO";
     };
 
@@ -82,7 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
         profileAvatar.textContent = toInitials(fullName);
         profileName.textContent = fullName;
         profileTagline.textContent = `Ficha operativa · ID ${row.dataset.id ?? "N/A"}`;
-        profileRole.textContent = row.dataset.rol ?? "Sin rol";
+        profileUsername.textContent = row.dataset.dui ?? "N/A";
+        profileRole.textContent = resolveRoleLabel(row.dataset.rol);
         profileStatus.textContent = (row.dataset.estado ?? "ACTIVO").toUpperCase();
         profileLoans.textContent = row.dataset.prestamos ?? "0";
         profileShift.textContent = mock.shift;
@@ -102,8 +143,16 @@ document.addEventListener("DOMContentLoaded", () => {
             modalTitle.textContent = "Editar Empleado";
             employeeForm?.setAttribute("action", `/gerencia/empleados/${row.dataset.id}`);
             nameInput.value = row.dataset.nombre ?? "";
-            roleInput.value = row.dataset.rol ?? "";
+            duiInput.value = row.dataset.dui ?? "";
+            roleInput.value = normalizeRoleCode(row.dataset.rol);
             statusInput.value = (row.dataset.estado ?? "ACTIVO").toUpperCase();
+            passwordInput.value = "";
+            passwordConfirmInput.value = "";
+            passwordInput.required = false;
+            passwordConfirmInput.required = false;
+            passwordInput.placeholder = "Dejá vacío para mantener la contraseña";
+            passwordConfirmInput.placeholder = "Repite solo si cambiás la contraseña";
+            usernameNote.textContent = `Usuario de acceso (DUI): ${row.dataset.dui ?? "No disponible"}`;
             openModal(employeeModal);
         });
 
@@ -124,10 +173,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     saveButton?.addEventListener("click", () => {
         if (!employeeForm) return;
-        if (!nameInput.value.trim() || !roleInput.value.trim()) {
+        if (!nameInput.value.trim() || !duiInput.value.trim() || !roleInput.value.trim()) {
             window.showUiToast?.("Completa los campos requeridos.");
             return;
         }
+
+        if (!isValidDui(duiInput.value)) {
+            window.showUiToast?.("Ingresá un DUI válido.");
+            return;
+        }
+
+        if (passwordInput.required && !passwordInput.value.trim()) {
+            window.showUiToast?.("Debes definir una contraseña.");
+            return;
+        }
+
+        if (passwordInput.value.trim() !== passwordConfirmInput.value.trim()) {
+            window.showUiToast?.("La confirmación de contraseña no coincide.");
+            return;
+        }
+
         employeeForm.submit();
     });
 

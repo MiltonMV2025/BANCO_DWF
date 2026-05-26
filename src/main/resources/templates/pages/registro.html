@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro | Banco de Agricultura Salvadoreño</title>
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+<body>
+<main class="login-layout">
+    <section class="brand-panel">
+        <div class="brand-content">
+            <h1>Banco de<br>Agricultura<br>Salvadoreño</h1>
+            <span class="brand-line"></span>
+            <p>Tu banco, tu confianza</p>
+        </div>
+    </section>
+
+    <section class="form-panel">
+        <div class="form-card">
+            <h2>Crear cuenta</h2>
+            <p class="subtitle">Completá tus datos para registrarte como cliente</p>
+
+            <div class="alerts">
+                <p class="alert alert-error" th:if="${registroError}" th:text="${registroError}">
+                    No se pudo completar el registro.
+                </p>
+            </div>
+
+            <form th:action="@{/registro}" method="post" class="login-form" id="register-form">
+                <label for="nombre">Nombre completo</label>
+                <input id="nombre" name="nombre" type="text" required maxlength="120" autocomplete="name">
+
+                <label for="dui">DUI</label>
+                <input id="dui" name="dui" type="text" required maxlength="10" minlength="10" pattern="\d{8}-\d" inputmode="numeric" placeholder="12345678-9" autocomplete="off">
+
+                <label for="salario">Salario mensual</label>
+                <input id="salario" name="salario" type="number" min="0" step="0.01" required>
+
+                <label for="password">Contraseña</label>
+                <div class="password-group">
+                    <input id="password" name="password" type="password" required minlength="6" autocomplete="new-password">
+                    <button type="button" id="togglePassword" class="eye-btn" aria-label="Mostrar u ocultar contraseña">👁</button>
+                </div>
+
+                <label for="confirmarPassword">Confirmar contraseña</label>
+                <div class="password-group">
+                    <input id="confirmarPassword" name="confirmarPassword" type="password" required minlength="6" autocomplete="new-password">
+                    <button type="button" id="toggleConfirmPassword" class="eye-btn" aria-label="Mostrar u ocultar confirmación">👁</button>
+                </div>
+
+                <button type="submit" class="btn-login">Crear cuenta</button>
+            </form>
+
+            <p class="register-hint">
+                ¿Ya tenés cuenta?
+                <a th:href="@{/login}" class="register-link">Iniciar sesión</a>
+            </p>
+        </div>
+    </section>
+</main>
+
+<script th:src="@{/js/dui-mask.js}"></script>
+<script th:src="@{/js/registro.js}"></script>
+</body>
+</html>

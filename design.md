@@ -74,9 +74,13 @@
 - Fechas en filtros: `input[type="date"]`.
 - Botón primario: fondo `--accent`, texto oscuro, peso 700.
 - Toast: feedback visual para confirmaciones y errores del backend.
+- Login:
+  - Formulario principal de acceso usando DUI + contraseña.
+  - Acceso a registro desde enlace "¿No tenés cuenta? Registrate" hacia pantalla dedicada (`/registro`).
+  - Registro crea cliente + cuenta base + usuario con `ROLE_CLIENTE`.
 - Modales CRUD conectados a backend para altas/ediciones/inactivaciones:
   - Clientes: `nombre`, `dui`, `salario`, `estado`
-  - Empleados: `nombre`, `rol`, `estado`
+  - Empleados: `nombre`, `dui` (requerido), `rol` (select desde tabla `rol`), `password`, `confirmarPassword`, `estado`
 - Badges estado:
   - verde = aprobado/activo
   - amarillo = en espera
