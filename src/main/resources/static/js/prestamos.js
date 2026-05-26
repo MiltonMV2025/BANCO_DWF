@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+
     const detailButtons = document.querySelectorAll(".link-btn:not(.cancel-btn)");
     const cancelButtons = document.querySelectorAll(".cancel-btn");
     const loanAmount = document.getElementById("loan-amount");
@@ -8,8 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const calculateFee = () => {
         const amount = Number(loanAmount?.value || 0);
         const monthly = amount > 0 ? amount / 12 : 0;
+
         if (monthlyFee) {
-            monthlyFee.value = monthly > 0 ? `$${monthly.toFixed(2)}` : "";
+            monthlyFee.value = monthly > 0
+                ? `$${monthly.toFixed(2)}`
+                : "";
         }
     };
 
@@ -26,10 +30,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     newLoanBtn?.addEventListener("click", () => {
-        document.querySelector(".open-loan-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        document.querySelector(".open-loan-section")
+            ?.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
     });
 
     loanAmount?.addEventListener("input", calculateFee);
-
     calculateFee();
 });

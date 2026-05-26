@@ -160,6 +160,76 @@ tbody tr:last-child td {
     box-shadow: 0 0 0 3px rgba(245, 196, 0, 0.2);
 }
 
+.profile-modal-card {
+    width: min(620px, 100%);
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.profile-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+    color: #374151;
+    font-weight: 800;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+}
+
+.profile-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+    padding: 0.55rem 0.65rem;
+    background: #f9fafb;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.profile-item-wide {
+    grid-column: 1 / -1;
+}
+
+.profile-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.profile-mock {
+    border: 1px dashed #d1d5db;
+    border-radius: 10px;
+    padding: 0.65rem;
+    background: #fcfcfd;
+    margin-bottom: 0.8rem;
+}
+
+.profile-mock h3 {
+    margin: 0 0 0.35rem;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.profile-mock p {
+    margin: 0.12rem 0;
+    color: #4b5563;
+    font-size: 0.88rem;
+}
 .modal-card-sm {
     width: min(420px, 100%);
 }
@@ -176,4 +246,9 @@ tbody tr:last-child td {
     .crud-grid {
         grid-template-columns: 1fr;
     }
+
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
 }
+
