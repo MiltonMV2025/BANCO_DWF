@@ -41,6 +41,12 @@ public class Prestamo {
     @Column(name = "estado", nullable = false, length = 20)
     private String estado;
 
+    @Column(name = "cuota_mensual", precision = 18, scale = 2)
+    private BigDecimal cuotaMensual;
+
+    @Column(name = "anios_pago", precision = 6, scale = 2)
+    private BigDecimal aniosPago;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_cliente", nullable = false)
     private Cliente cliente;
@@ -87,6 +93,22 @@ public class Prestamo {
 
     public void setEstado(final String estado) {
         this.estado = estado;
+    }
+
+    public BigDecimal getCuotaMensual() {
+        return cuotaMensual;
+    }
+
+    public void setCuotaMensual(final BigDecimal cuotaMensual) {
+        this.cuotaMensual = cuotaMensual;
+    }
+
+    public BigDecimal getAniosPago() {
+        return aniosPago;
+    }
+
+    public void setAniosPago(final BigDecimal aniosPago) {
+        this.aniosPago = aniosPago;
     }
 
     public Cliente getCliente() {

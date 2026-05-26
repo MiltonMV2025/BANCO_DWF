@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movimientos | Banco de Agricultura Salvadoreño</title>
+    <link rel="stylesheet" th:href="@{/css/app-shell.css}">
+    <link rel="stylesheet" th:href="@{/css/movimientos.css}">
+</head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{layout/fragments :: topbar}"></header>
+    <aside th:replace="~{layout/fragments :: sidebar('movimientos')}"></aside>
+
+    <main class="content">
+        <h1>Movimientos</h1>
+        <p class="subtitle">Historial de transacciones de tus cuentas</p>
+
+        <form class="movements-filters" method="get" th:action="@{/movimientos}">
+            <div class="filter-field">
+                <label for="movement-account">Seleccionar cuenta</label>
+                <select id="movement-account" name="cuentaId">
+                    <option th:if="${#lists.isEmpty(cuentasMovimiento)}" value="">Sin cuentas</option>
+                    <option th:each="cuenta : ${cuentasMovimiento}"
+                            th:value="${cuenta.idCuenta}"
+                            th:selected="${cuentaSeleccionadaId != null and cuenta.idCuenta == cuentaSeleccionadaId}"
+                            th:text="${(cuenta.numeroCuenta != null ? cuenta.numeroCuenta : '**** ' + cuenta.idCuenta) + ' — ' + cuenta.tipo}">
+                        Cuenta
+                    </option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="from-date">Desde</label>
+                <input id="from-date" name="desde" type="date" th:value="${desdeMovimiento}">
+            </div>
+
+            <div class="filter-field">
+                <label for="to-date">Hasta</label>
+                <input id="to-date" name="hasta" type="date" th:value="${hastaMovimiento}">
+            </div>
+
+            <div class="filter-field filter-action">
+                <button type="submit" class="btn-accent" id="apply-filter">Filtrar</button>
+            </div>
+        </form>
+
+        <div class="movements-table-wrap">
+            <table class="movements-table">
+                <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Descripción</th>
+                    <th>Tipo</th>
+                    <th class="amount-col">Monto</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(movimientos)}">
+                    <td colspan="4" class="empty-inline">No hay movimientos para los filtros seleccionados.</td>
+                </tr>
+                <tr th:each="mov : ${movimientos}">
+                    <td th:text="${#temporals.format(mov.fecha, 'dd/MM/yyyy')}">01/01/2026</td>
+                    <td th:text="${mov.tipo == 'RETIRO' ? 'Retiro de cuenta' : 'Depósito en cuenta'}">Descripción</td>
+                    <td th:text="${mov.tipo == 'RETIRO' ? 'Retiro' : 'Depósito'}">Depósito</td>
+                    <td class="amount-col"
+                        th:classappend="${mov.tipo == 'RETIRO'} ? 'negative' : 'positive'"
+                        th:text="${(mov.tipo == 'RETIRO' ? '-' : '+') + '$' + #numbers.formatDecimal(mov.monto, 1, 'COMMA', 2, 'POINT')}">
+                        +$0.00
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}"></div>
+
+<script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/movimientos.js}"></script>
+</body>
+</html>

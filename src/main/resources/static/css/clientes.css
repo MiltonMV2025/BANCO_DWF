@@ -1,0 +1,253 @@
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.btn-primary,
+.btn-secondary {
+    height: 40px;
+    border-radius: 9px;
+    font-weight: 700;
+    padding: 0 1rem;
+    cursor: pointer;
+}
+
+.btn-primary {
+    border: none;
+    background: var(--accent);
+    color: #111;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.btn-secondary {
+    border: 1px solid #111827;
+    background: #fff;
+    color: #111827;
+}
+
+.filters-row {
+    display: grid;
+    grid-template-columns: 1fr 220px auto;
+    gap: 0.55rem;
+    margin-bottom: 0.85rem;
+}
+
+.filters-row input,
+.filters-row select {
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    padding: 0 0.72rem;
+    background: #fff;
+}
+
+.table-wrap {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+th, td {
+    text-align: left;
+    padding: 0.75rem 0.65rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+    color: #374151;
+    font-weight: 700;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.empty-row td {
+    text-align: center;
+    color: #6b7280;
+    padding: 1rem 0.75rem;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.26rem 0.62rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.badge.ok {
+    background: #22c55e;
+    color: #fff;
+}
+
+.badge.warn {
+    background: #eab308;
+    color: #111;
+}
+
+.link-btn {
+    border: none;
+    background: transparent;
+    color: #374151;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.link-btn:hover {
+    text-decoration: underline;
+}
+
+.action-divider {
+    color: #9ca3af;
+    margin: 0 0.2rem;
+}
+
+.delete-btn {
+    color: #b91c1c;
+}
+
+.crud-form {
+    margin-top: 0.3rem;
+}
+
+.crud-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+}
+
+.crud-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.crud-field label {
+    font-size: 0.86rem;
+    color: #4b5563;
+    font-weight: 600;
+}
+
+.crud-field input,
+.crud-field select {
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    padding: 0 0.72rem;
+    background: #fff;
+    color: var(--text-main);
+    outline: none;
+}
+
+.crud-field input:focus,
+.crud-field select:focus {
+    border-color: #c7a008;
+    box-shadow: 0 0 0 3px rgba(245, 196, 0, 0.2);
+}
+
+.profile-modal-card {
+    width: min(620px, 100%);
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.profile-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+    color: #374151;
+    font-weight: 800;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+}
+
+.profile-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+    padding: 0.55rem 0.65rem;
+    background: #f9fafb;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.profile-item-wide {
+    grid-column: 1 / -1;
+}
+
+.profile-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.profile-mock {
+    border: 1px dashed #d1d5db;
+    border-radius: 10px;
+    padding: 0.65rem;
+    background: #fcfcfd;
+    margin-bottom: 0.8rem;
+}
+
+.profile-mock h3 {
+    margin: 0 0 0.35rem;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.profile-mock p {
+    margin: 0.12rem 0;
+    color: #4b5563;
+    font-size: 0.88rem;
+}
+.modal-card-sm {
+    width: min(420px, 100%);
+}
+
+@media (max-width: 900px) {
+    .filters-row {
+        grid-template-columns: 1fr;
+    }
+
+    .header-row {
+        flex-direction: column;
+    }
+
+    .crud-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+}
+

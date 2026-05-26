@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes | Panel Gerencia</title>
+    <link rel="stylesheet" th:href="@{/css/app-shell.css}">
+    <link rel="stylesheet" th:href="@{/css/clientes.css}">
+</head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{layout/fragments :: topbar}"></header>
+    <aside th:replace="~{layout/fragments :: sidebar('clientes')}"></aside>
+
+    <main class="content">
+        <section class="header-row">
+            <div>
+                <h1>Clientes</h1>
+                <p class="subtitle">Gestión de cartera de clientes del banco</p>
+            </div>
+            <button type="button" class="btn-primary" id="new-client-btn">
+                <i class="bi bi-plus"></i>
+                Nuevo Cliente
+            </button>
+        </section>
+
+        <form class="filters-row" method="get" th:action="@{/gerencia/clientes}">
+            <input type="text" id="search-client" name="q" th:value="${qClientes}" placeholder="Buscar por nombre o DUI">
+            <select id="status-filter" name="estado">
+                <option value="" th:selected="${estadoClientes == null or estadoClientes.isEmpty()}">Todos los estados</option>
+                <option value="ACTIVO" th:selected="${estadoClientes == 'ACTIVO'}">Activos</option>
+                <option value="INACTIVO" th:selected="${estadoClientes == 'INACTIVO'}">Inactivos</option>
+                <option value="MONITOREO" th:selected="${estadoClientes == 'MONITOREO'}">Monitoreo</option>
+            </select>
+            <button type="submit" class="btn-secondary">Filtrar</button>
+        </form>
+
+        <section class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>DUI</th>
+                    <th>Cuentas</th>
+                    <th>Saldo Total</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(clientes)}" class="empty-row">
+                    <td colspan="6">No hay clientes registrados.</td>
+                </tr>
+                <tr th:each="cliente : ${clientes}"
+                    th:attr="data-id=${cliente.id},
+                             data-nombre=${cliente.nombre},
+                             data-dui=${cliente.dui},
+                             data-salario=${cliente.salario},
+                             data-estado=${cliente.estado},
+                             data-cuentas=${cliente.totalCuentas},
+                             data-saldo=${cliente.saldoTotal}">
+                    <td th:text="${cliente.nombre}">Nombre</td>
+                    <td th:text="${cliente.dui}">00000000-0</td>
+                    <td th:text="${cliente.totalCuentas}">0</td>
+                    <td th:text="${'$' + #numbers.formatDecimal(cliente.saldoTotal, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${cliente.estado != null and cliente.estado.equalsIgnoreCase('ACTIVO')} ? ' ok' : ' warn'"
+                              th:text="${cliente.estado}">ACTIVO</span>
+                    </td>
+                    <td>
+                        <button type="button" class="link-btn view-btn">Ver perfil</button>
+                        <span class="action-divider">|</span>
+                        <button type="button" class="link-btn edit-btn">Editar</button>
+                        <span class="action-divider">|</span>
+                        <button type="button" class="link-btn delete-btn">Inactivar</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}"></div>
+
+<div class="modal-backdrop" id="client-profile-modal" aria-hidden="true">
+    <div class="modal-card profile-modal-card">
+        <div class="profile-header">
+            <div class="profile-avatar" id="client-profile-avatar">CL</div>
+            <div>
+                <h2 class="modal-title" id="client-profile-name">Perfil de cliente</h2>
+                <p class="modal-subtitle" id="client-profile-tagline">Ficha de información</p>
+            </div>
+        </div>
+
+        <div class="profile-grid">
+            <div class="profile-item">
+                <span class="profile-label">DUI</span>
+                <strong id="client-profile-dui">00000000-0</strong>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Estado</span>
+                <strong id="client-profile-status">ACTIVO</strong>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Salario</span>
+                <strong id="client-profile-salary">$0.00</strong>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Cuentas activas</span>
+                <strong id="client-profile-accounts">0</strong>
+            </div>
+            <div class="profile-item profile-item-wide">
+                <span class="profile-label">Saldo total</span>
+                <strong id="client-profile-balance">$0.00</strong>
+            </div>
+        </div>
+
+        <div class="profile-mock">
+            <h3>Información adicional</h3>
+            <p id="client-profile-email">cliente@banco.com</p>
+            <p id="client-profile-phone">+503 7000-0000</p>
+            <p id="client-profile-manager">Gestor asignado: Ejecutivo Comercial</p>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-primary" id="client-profile-close">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="client-modal" aria-hidden="true">
+    <div class="modal-card">
+        <h2 class="modal-title" id="client-modal-title">Nuevo Cliente</h2>
+        <p class="modal-subtitle">Formulario CRUD conectado a base de datos</p>
+
+        <form id="client-form" class="crud-form" method="post" th:action="@{/gerencia/clientes}">
+            <div class="crud-grid">
+                <div class="crud-field">
+                    <label for="client-name">Nombre</label>
+                    <input id="client-name" name="nombre" type="text" required maxlength="120">
+                </div>
+
+                <div class="crud-field">
+                    <label for="client-dui">DUI</label>
+                    <input id="client-dui" name="dui" type="text" required maxlength="10" placeholder="00000000-0">
+                </div>
+
+                <div class="crud-field">
+                    <label for="client-salary">Salario</label>
+                    <input id="client-salary" name="salario" type="number" min="0" step="0.01" required>
+                </div>
+
+                <div class="crud-field">
+                    <label for="client-status">Estado</label>
+                    <select id="client-status" name="estado" required>
+                        <option value="ACTIVO">ACTIVO</option>
+                        <option value="MONITOREO">MONITOREO</option>
+                        <option value="INACTIVO">INACTIVO</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-secondary" id="client-cancel">Cancelar</button>
+            <button type="button" class="btn-modal-primary" id="client-save">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="client-delete-modal" aria-hidden="true">
+    <div class="modal-card modal-card-sm">
+        <h2 class="modal-title">Inactivar Cliente</h2>
+        <p class="modal-subtitle" id="client-delete-text">¿Deseas inactivar este cliente?</p>
+        <form id="client-delete-form" method="post"></form>
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-secondary" id="client-delete-cancel">Cancelar</button>
+            <button type="button" class="btn-modal-danger" id="client-delete-confirm">Inactivar</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/clientes.js}"></script>
+</body>
+</html>

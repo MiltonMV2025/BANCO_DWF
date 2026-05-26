@@ -35,6 +35,9 @@ public class Cuenta {
     @Column(name = "saldo", nullable = false, precision = 18, scale = 2)
     private BigDecimal saldo;
 
+    @Column(name = "numero_cuenta", length = 20)
+    private String numeroCuenta;
+
     @Column(name = "tipo", nullable = false, length = 30)
     private String tipo;
 
@@ -62,6 +65,14 @@ public class Cuenta {
 
     public void setSaldo(final BigDecimal saldo) {
         this.saldo = saldo;
+    }
+
+    public String getNumeroCuenta() {
+        return numeroCuenta;
+    }
+
+    public void setNumeroCuenta(final String numeroCuenta) {
+        this.numeroCuenta = numeroCuenta;
     }
 
     public String getTipo() {

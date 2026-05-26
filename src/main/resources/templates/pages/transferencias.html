@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Transacción | Banco de Agricultura Salvadoreño</title>
+    <link rel="stylesheet" th:href="@{/css/app-shell.css}">
+    <link rel="stylesheet" th:href="@{/css/transferencias.css}">
+</head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{layout/fragments :: topbar}"></header>
+    <aside th:replace="~{layout/fragments :: sidebar('transferencias')}"></aside>
+
+    <main class="content">
+        <h1>Nueva Transacción</h1>
+        <p class="subtitle">Completa los datos para realizar la operación</p>
+
+        <section class="transaction-layout">
+            <div class="transaction-form">
+                <form method="get" th:action="@{/transferencias}">
+                    <div class="form-group">
+                        <label for="dui-search">DUI del cliente</label>
+                        <div class="dui-search-row">
+                            <div class="dui-input-wrap">
+                                <i class="bi bi-search" aria-hidden="true"></i>
+                                <input id="dui-search" name="dui" type="text" th:value="${duiBusqueda}" placeholder="00000000-0">
+                            </div>
+                            <button type="submit" class="btn-outline">Buscar</button>
+                        </div>
+                    </div>
+                </form>
+
+                <article class="client-found-card" th:if="${duiBusqueda != null and !duiBusqueda.isEmpty() and !clienteEncontrado}">
+                    <p class="client-empty-state">No se encontró cliente con DUI <strong th:text="${duiBusqueda}">00000000-0</strong>.</p>
+                </article>
+
+                <article class="client-found-card" th:if="${clienteEncontrado}">
+                    <p class="client-found-title">
+                        <i class="bi bi-check-circle" aria-hidden="true"></i>
+                        Cliente encontrado
+                    </p>
+                    <p class="client-name" th:text="${cliente.nombre}">Cliente</p>
+                    <p class="client-dui">DUI: <span th:text="${cliente.dui}">00000000-0</span></p>
+
+                    <div class="client-accounts" th:if="${!#lists.isEmpty(cuentasCliente)}">
+                        <span class="account-pill"
+                              th:each="cuenta : ${cuentasCliente}"
+                              th:text="${(cuenta.numeroCuenta != null ? cuenta.numeroCuenta : '**** ' + cuenta.idCuenta) + ' — ' + cuenta.tipo}">
+                            **** 0 — Cuenta
+                        </span>
+                    </div>
+
+                    <p class="client-empty-state" th:if="${#lists.isEmpty(cuentasCliente)}">
+                        El cliente no tiene cuentas registradas.
+                    </p>
+                </article>
+
+                <form method="get" th:action="@{/transferencias}" th:if="${clienteEncontrado and !#lists.isEmpty(cuentasCliente)}">
+                    <input type="hidden" name="dui" th:value="${duiBusqueda}">
+                    <input type="hidden" name="tipo" th:value="${tipoOperacion}">
+                    <input type="hidden" name="monto" th:value="${montoOperacion}">
+
+                    <div class="form-group">
+                        <label for="account-select">Cuenta destino / origen</label>
+                        <select id="account-select" name="cuentaId" onchange="this.form.submit()">
+                            <option th:each="cuenta : ${cuentasCliente}"
+                                    th:value="${cuenta.idCuenta}"
+                                    th:selected="${cuentaSeleccionada != null and cuenta.idCuenta == cuentaSeleccionada.idCuenta}"
+                                    th:text="${(cuenta.numeroCuenta != null ? cuenta.numeroCuenta : '**** ' + cuenta.idCuenta) + ' — ' + cuenta.tipo}">
+                                Cuenta
+                            </option>
+                        </select>
+                    </div>
+                </form>
+
+                <form id="transfer-operation-form"
+                      method="post"
+                      th:action="@{/transferencias/procesar}"
+                      th:if="${clienteEncontrado and cuentaSeleccionada != null}">
+                    <input type="hidden" name="dui" th:value="${duiBusqueda}">
+                    <input type="hidden" name="cuentaId" th:value="${cuentaSeleccionada.idCuenta}">
+                    <input type="hidden" name="tipo" id="operation-type-input" th:value="${tipoOperacion}">
+                    <input type="hidden" name="monto" id="operation-amount-input" th:value="${montoOperacion}">
+
+                    <div class="form-group">
+                        <label>Tipo de operación</label>
+                        <div class="operation-toggle">
+                            <button type="button" class="operation-btn"
+                                    th:classappend="${tipoOperacion == 'DEPOSITO'} ? ' active'"
+                                    data-type="DEPOSITO">Depósito</button>
+                            <button type="button" class="operation-btn"
+                                    th:classappend="${tipoOperacion == 'RETIRO'} ? ' active'"
+                                    data-type="RETIRO">Retiro</button>
+                            <button type="button" class="operation-btn"
+                                    th:classappend="${tipoOperacion == 'TRANSFERENCIA'} ? ' active'"
+                                    data-type="TRANSFERENCIA">Transferencia</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="destination-account-group"
+                         th:classappend="${tipoOperacion != 'TRANSFERENCIA'} ? ' hidden'">
+                        <label for="destination-account-select">Cuenta destino</label>
+                        <select id="destination-account-select" name="cuentaDestinoId">
+                            <option value="">Selecciona una cuenta destino</option>
+                            <option th:each="cuentaDestino : ${cuentasDestino}"
+                                    th:if="${cuentaSeleccionada == null or cuentaDestino.idCuenta != cuentaSeleccionada.idCuenta}"
+                                    th:value="${cuentaDestino.idCuenta}"
+                                    th:selected="${cuentaDestinoId != null and cuentaDestino.idCuenta == cuentaDestinoId}"
+                                    th:text="${(cuentaDestino.numeroCuenta != null ? cuentaDestino.numeroCuenta : '**** ' + cuentaDestino.idCuenta) + ' — ' + cuentaDestino.cliente.nombre}">
+                                Cuenta destino
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="amount-input" id="amount-label" th:text="${tipoOperacion == 'RETIRO'} ? 'Monto a retirar' : (${tipoOperacion == 'TRANSFERENCIA'} ? 'Monto a transferir' : 'Monto a depositar')">
+                            Monto
+                        </label>
+                        <div class="amount-wrap">
+                            <span>$</span>
+                            <input id="amount-input" type="number" min="0.01" step="0.01" th:value="${montoOperacion}">
+                        </div>
+                        <p class="balance-note">
+                            Saldo actual:
+                            <span th:text="${'$' + #numbers.formatDecimal(cuentaSeleccionada.saldo, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
+                        </p>
+                    </div>
+
+                    <button type="submit" class="btn-confirm" id="confirm-action">
+                        Confirmar <span th:text="${tipoOperacion == 'RETIRO'} ? 'Retiro' : (${tipoOperacion == 'TRANSFERENCIA'} ? 'Transferencia' : 'Depósito')">Depósito</span>
+                    </button>
+                </form>
+
+                <section class="recent-movements" th:if="${clienteEncontrado}">
+                    <h3>Movimientos recientes de la cuenta</h3>
+                    <table th:if="${!#lists.isEmpty(movimientosRecientes)}">
+                        <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Monto</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="mov : ${movimientosRecientes}">
+                            <td th:text="${#temporals.format(mov.fecha, 'dd/MM/yyyy')}">01/01/2026</td>
+                            <td th:text="${mov.tipo == 'RETIRO' ? 'Retiro' : 'Depósito'}">Depósito</td>
+                            <td th:text="${'$' + #numbers.formatDecimal(mov.monto, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <p class="empty-inline" th:if="${#lists.isEmpty(movimientosRecientes)}">
+                        No hay movimientos para esta cuenta.
+                    </p>
+                </section>
+            </div>
+
+            <aside class="summary-card">
+                <h2>Resumen de Operación</h2>
+                <div th:if="${clienteEncontrado}">
+                    <dl class="summary-list">
+                        <div>
+                            <dt>Cliente:</dt>
+                            <dd th:text="${cliente.nombre}">Cliente</dd>
+                        </div>
+                        <div>
+                            <dt>DUI:</dt>
+                            <dd th:text="${cliente.dui}">00000000-0</dd>
+                        </div>
+                        <div>
+                            <dt>Cuenta:</dt>
+                            <dd id="summary-account" th:text="${cuentaSeleccionada != null ? (cuentaSeleccionada.numeroCuenta != null ? cuentaSeleccionada.numeroCuenta : '**** ' + cuentaSeleccionada.idCuenta) : 'N/D'}">N/D</dd>
+                        </div>
+                        <div id="summary-destination-row" th:classappend="${tipoOperacion != 'TRANSFERENCIA'} ? ' hidden'">
+                            <dt>Destino:</dt>
+                            <dd id="summary-destination"
+                                th:text="${cuentaDestinoSeleccionada != null ? (cuentaDestinoSeleccionada.numeroCuenta != null ? cuentaDestinoSeleccionada.numeroCuenta : 'Cuenta #' + cuentaDestinoSeleccionada.idCuenta) : 'N/D'}">
+                                N/D
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Tipo:</dt>
+                            <dd id="summary-type" th:text="${tipoOperacion == 'RETIRO'} ? 'Retiro' : (${tipoOperacion == 'TRANSFERENCIA'} ? 'Transferencia' : 'Depósito')">Depósito</dd>
+                        </div>
+                        <div>
+                            <dt>Monto:</dt>
+                            <dd id="summary-amount" th:text="${'$' + #numbers.formatDecimal(montoOperacion, 1, 'COMMA', 2, 'POINT')}">$0.00</dd>
+                        </div>
+                        <div>
+                            <dt>Fecha:</dt>
+                            <dd th:text="${#temporals.format(fechaOperacion, 'dd/MM/yyyy')}">01/01/2026</dd>
+                        </div>
+                    </dl>
+
+                    <div class="summary-total">
+                        <p>Total a procesar:</p>
+                        <strong id="summary-total" th:text="${'$' + #numbers.formatDecimal(montoOperacion, 1, 'COMMA', 2, 'POINT')}">$0.00</strong>
+                    </div>
+
+                    <p class="warning-note">Esta operación no puede deshacerse</p>
+                </div>
+
+                <p class="empty-inline" th:if="${!clienteEncontrado}">
+                    Busca un cliente por DUI para mostrar el resumen.
+                </p>
+            </aside>
+        </section>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}"></div>
+
+<script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/transferencias.js}"></script>
+</body>
+</html>

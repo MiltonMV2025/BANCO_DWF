@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empleados | Panel Gerencia</title>
+    <link rel="stylesheet" th:href="@{/css/app-shell.css}">
+    <link rel="stylesheet" th:href="@{/css/empleados.css}">
+</head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{layout/fragments :: topbar}"></header>
+    <aside th:replace="~{layout/fragments :: sidebar('empleados')}"></aside>
+
+    <main class="content">
+        <section class="header-row">
+            <div>
+                <h1>Empleados</h1>
+                <p class="subtitle">Gestión de personal de sucursal y operaciones</p>
+            </div>
+            <button type="button" class="btn-primary" id="new-employee-btn">
+                <i class="bi bi-plus"></i>
+                Nuevo Empleado
+            </button>
+        </section>
+
+        <form class="filters-row" method="get" th:action="@{/gerencia/empleados}">
+            <input type="text" id="search-employee" name="q" th:value="${qEmpleados}" placeholder="Buscar por nombre o rol">
+            <select id="status-filter-employee" name="estado">
+                <option value="" th:selected="${estadoEmpleados == null or estadoEmpleados.isEmpty()}">Todos los estados</option>
+                <option value="ACTIVO" th:selected="${estadoEmpleados == 'ACTIVO'}">Activos</option>
+                <option value="INACTIVO" th:selected="${estadoEmpleados == 'INACTIVO'}">Inactivos</option>
+            </select>
+            <button type="submit" class="btn-secondary">Filtrar</button>
+        </form>
+
+        <section class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Empleado</th>
+                    <th>Cargo</th>
+                    <th>Préstamos asignados</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(empleados)}" class="empty-row">
+                    <td colspan="5">No hay empleados registrados.</td>
+                </tr>
+                <tr th:each="empleado : ${empleados}"
+                    th:attr="data-id=${empleado.idEmpleado},
+                             data-nombre=${empleado.nombre},
+                             data-rol=${empleado.rol},
+                             data-estado=${empleado.estado},
+                             data-prestamos=${empleado.prestamosAsignados}">
+                    <td th:text="${empleado.nombre}">Nombre</td>
+                    <td th:text="${empleado.rol}">Cargo</td>
+                    <td th:text="${empleado.prestamosAsignados}">0</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${empleado.estado != null and empleado.estado.equalsIgnoreCase('ACTIVO')} ? ' ok' : ' warn'"
+                              th:text="${empleado.estado}">ACTIVO</span>
+                    </td>
+                    <td>
+                        <button type="button" class="link-btn view-btn">Ver ficha</button>
+                        <span class="action-divider">|</span>
+                        <button type="button" class="link-btn edit-btn">Editar</button>
+                        <span class="action-divider">|</span>
+                        <button type="button" class="link-btn delete-btn">Inactivar</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}"></div>
+
+<div class="modal-backdrop" id="employee-profile-modal" aria-hidden="true">
+    <div class="modal-card profile-modal-card">
+        <div class="profile-header">
+            <div class="profile-avatar" id="employee-profile-avatar">EM</div>
+            <div>
+                <h2 class="modal-title" id="employee-profile-name">Ficha de empleado</h2>
+                <p class="modal-subtitle" id="employee-profile-tagline">Detalle operativo y de contacto</p>
+            </div>
+        </div>
+
+        <div class="profile-grid">
+            <div class="profile-item">
+                <span class="profile-label">Cargo</span>
+                <strong id="employee-profile-role">Analista</strong>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Estado</span>
+                <strong id="employee-profile-status">ACTIVO</strong>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Préstamos asignados</span>
+                <strong id="employee-profile-loans">0</strong>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Turno</span>
+                <strong id="employee-profile-shift">Matutino</strong>
+            </div>
+            <div class="profile-item profile-item-wide">
+                <span class="profile-label">Sucursal</span>
+                <strong id="employee-profile-branch">Sucursal Centro</strong>
+            </div>
+        </div>
+
+        <div class="profile-mock">
+            <h3>Información adicional</h3>
+            <p id="employee-profile-email">empleado@banco.com</p>
+            <p id="employee-profile-phone">+503 7111-1111</p>
+            <p id="employee-profile-joined">Ingreso: 2022-01-15</p>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-primary" id="employee-profile-close">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="employee-modal" aria-hidden="true">
+    <div class="modal-card">
+        <h2 class="modal-title" id="employee-modal-title">Nuevo Empleado</h2>
+        <p class="modal-subtitle">Formulario CRUD conectado a base de datos</p>
+
+        <form id="employee-form" class="crud-form" method="post" th:action="@{/gerencia/empleados}">
+            <div class="crud-grid">
+                <div class="crud-field">
+                    <label for="employee-name">Nombre</label>
+                    <input id="employee-name" name="nombre" type="text" required maxlength="120">
+                </div>
+
+                <div class="crud-field">
+                    <label for="employee-role">Rol</label>
+                    <input id="employee-role" name="rol" type="text" required maxlength="50">
+                </div>
+
+                <div class="crud-field">
+                    <label for="employee-status">Estado</label>
+                    <select id="employee-status" name="estado" required>
+                        <option value="ACTIVO">ACTIVO</option>
+                        <option value="INACTIVO">INACTIVO</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-secondary" id="employee-cancel">Cancelar</button>
+            <button type="button" class="btn-modal-primary" id="employee-save">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="employee-delete-modal" aria-hidden="true">
+    <div class="modal-card modal-card-sm">
+        <h2 class="modal-title">Inactivar Empleado</h2>
+        <p class="modal-subtitle" id="employee-delete-text">¿Deseas inactivar este empleado?</p>
+        <form id="employee-delete-form" method="post"></form>
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-secondary" id="employee-delete-cancel">Cancelar</button>
+            <button type="button" class="btn-modal-danger" id="employee-delete-confirm">Inactivar</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/empleados.js}"></script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Préstamos | Banco de Agricultura Salvadoreño</title>
+    <link rel="stylesheet" th:href="@{/css/app-shell.css}">
+    <link rel="stylesheet" th:href="@{/css/prestamos.css}">
+</head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{layout/fragments :: topbar}"></header>
+    <aside th:replace="~{layout/fragments :: sidebar('prestamos')}"></aside>
+
+    <main class="content">
+        <section class="header-row">
+            <div>
+                <h1>Mis Préstamos</h1>
+                <p class="subtitle">Consulta tus préstamos, estados y pagos mensuales</p>
+            </div>
+            <button type="button" class="btn-new-loan" id="new-loan-btn">
+                <i class="bi bi-plus"></i>
+                Solicitar Préstamo
+            </button>
+        </section>
+
+        <section class="loans-table-wrap">
+            <table class="loans-table">
+                <thead>
+                <tr>
+                    <th>Número</th>
+                    <th>Monto Original</th>
+                    <th>Interés</th>
+                    <th>Cuota Mensual</th>
+                    <th>Saldo Pendiente</th>
+                    <th>Estado</th>
+                    <th class="actions-col">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(prestamos)}" class="empty-row">
+                    <td colspan="7">No hay préstamos registrados aún.</td>
+                </tr>
+                <tr th:each="prestamo : ${prestamos}">
+                    <td th:text="${'PR-' + prestamo.idPrestamo}">PR-0</td>
+                    <td th:text="${'$' + #numbers.formatDecimal(prestamo.monto, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                    <td th:text="${prestamo.interes + '%'}">0%</td>
+                    <td th:text="${'$' + #numbers.formatDecimal((prestamo.monto / prestamo.plazoMeses), 1, 'COMMA', 2, 'POINT') + '/mes'}">$0.00/mes</td>
+                    <td>N/D</td>
+                    <td>
+                        <span class="status-badge"
+                              th:classappend="${
+                                  prestamo.estado != null and (prestamo.estado.equalsIgnoreCase('APROBADO') or prestamo.estado.equalsIgnoreCase('ACTIVO'))
+                                  ? ' status-approved'
+                                  : (prestamo.estado != null and prestamo.estado.equalsIgnoreCase('RECHAZADO') ? ' status-rejected' : ' status-pending')
+                              }"
+                              th:text="${prestamo.estado}">
+                            Estado
+                        </span>
+                    </td>
+                    <td class="actions-cell actions-col">
+                        <div class="actions-group">
+                            <button type="button" class="link-btn">Ver detalle</button>
+                            <span class="action-divider" aria-hidden="true"
+                                  th:if="${prestamo.estado == null or prestamo.estado.equalsIgnoreCase('EN ESPERA') or prestamo.estado.equalsIgnoreCase('PENDIENTE')}">|</span>
+                            <button type="button" class="link-btn cancel-btn"
+                                    th:if="${prestamo.estado == null or prestamo.estado.equalsIgnoreCase('EN ESPERA') or prestamo.estado.equalsIgnoreCase('PENDIENTE')}">Cancelar solicitud</button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="open-loan-section">
+            <h2>Nueva Solicitud de Préstamo</h2>
+            <p class="subtitle">Completa tu solicitud y quedará pendiente de aprobación de gerencia</p>
+
+            <form th:action="@{/prestamos}" method="post">
+                <div class="open-loan-grid">
+                    <div class="loan-form-column">
+                        <div class="field-group">
+                            <label for="loan-purpose">Destino del préstamo</label>
+                            <select id="loan-purpose" name="destino">
+                                <option value="Capital de trabajo">Capital de trabajo</option>
+                                <option value="Compra de equipo">Compra de equipo</option>
+                                <option value="Mejora de vivienda">Mejora de vivienda</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="loan-amount">Monto solicitado</label>
+                            <input id="loan-amount" name="monto" type="number" min="0.01" step="0.01" placeholder="$ 0.00" required>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="loan-dui">DUI del cliente</label>
+                            <input id="loan-dui" name="dui" type="text" placeholder="00000000-0" required>
+                        </div>
+                    </div>
+
+                    <div class="loan-form-column">
+                        <article class="rules-card">
+                            <p class="rules-title">Política de evaluación:</p>
+                            <ul>
+                                <li>La solicitud se revisa por gerencia de créditos.</li>
+                                <li>Se valida historial, ingresos y nivel de endeudamiento.</li>
+                                <li>El resultado puede ser: Aprobado, En espera o Rechazado.</li>
+                            </ul>
+                        </article>
+
+                        <div class="field-group">
+                            <label for="monthly-fee">Cuota mensual estimada</label>
+                            <input id="monthly-fee" type="text" value="" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-open-loan" id="open-loan-case">Enviar Solicitud</button>
+            </form>
+            <p class="disclaimer">La gerencia te notificará el estado de tu solicitud</p>
+        </section>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}"></div>
+
+<script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/prestamos.js}"></script>
+</body>
+</html>
