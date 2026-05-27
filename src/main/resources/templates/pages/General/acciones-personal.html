@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acciones de Personal | Panel Gerente General</title>
+    <link rel="stylesheet" th:href="@{/css/app-shell.css}">
+    <link rel="stylesheet" th:href="@{/css/acciones-personal.css}">
+</head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{layout/fragments :: topbar}"></header>
+    <aside th:replace="~{layout/fragments :: sidebar('acciones-personal')}"></aside>
+
+    <main class="content">
+        <section class="header-row">
+            <div>
+                <h1>Acciones de Personal</h1>
+                <p class="subtitle">Aprobar o rechazar solicitudes de ingreso de nuevos empleados</p>
+            </div>
+        </section>
+
+        <form class="filters-row" method="get"
+              th:action="@{/gerencia/general/acciones-personal}">
+            <input type="text" name="q" th:value="${q}"
+                   placeholder="Buscar por nombre o rol">
+            <button type="submit" class="btn-secondary">Filtrar</button>
+        </form>
+
+        <section class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Empleado</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(pendientes)}" class="empty-row">
+                    <td colspan="4">No hay acciones de personal pendientes.</td>
+                </tr>
+                <tr th:each="emp : ${pendientes}"
+                    th:attr="data-id=${emp.idEmpleado},
+                             data-nombre=${emp.nombre},
+                             data-rol=${emp.rol}">
+                    <td th:text="${emp.nombre}">Nombre</td>
+                    <td th:text="${emp.rol}">Rol</td>
+                    <td>
+                        <span class="badge warn">EN ESPERA</span>
+                    </td>
+                    <td>
+                        <button type="button" class="link-btn aprobar-btn">Aprobar</button>
+                        <span class="action-divider">|</span>
+                        <button type="button" class="link-btn rechazar-btn">Rechazar</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"
+     th:attr="data-auto-message=${toastMessage}"></div>
+
+<!-- Modal: Confirmar Aprobar -->
+<div class="modal-backdrop" id="aprobar-modal" aria-hidden="true">
+    <div class="modal-card modal-card-sm">
+        <h2 class="modal-title">Aprobar Empleado</h2>
+        <p class="modal-subtitle" id="aprobar-text">¿Deseas aprobar a este empleado?</p>
+        <form id="aprobar-form" method="post"></form>
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-secondary" id="aprobar-cancel">Cancelar</button>
+            <button type="button" class="btn-modal-primary" id="aprobar-confirm">Aprobar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirmar Rechazar -->
+<div class="modal-backdrop" id="rechazar-modal" aria-hidden="true">
+    <div class="modal-card modal-card-sm">
+        <h2 class="modal-title">Rechazar Empleado</h2>
+        <p class="modal-subtitle" id="rechazar-text">¿Deseas rechazar a este empleado?</p>
+        <form id="rechazar-form" method="post"></form>
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-secondary" id="rechazar-cancel">Cancelar</button>
+            <button type="button" class="btn-modal-danger" id="rechazar-confirm">Rechazar</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/acciones-personal.js}"></script>
+</body>
+</html>

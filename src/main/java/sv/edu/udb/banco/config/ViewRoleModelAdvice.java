@@ -1,13 +1,13 @@
 package sv.edu.udb.banco.config;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.ui.Model;
-
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 @ControllerAdvice
 public class ViewRoleModelAdvice {
@@ -17,6 +17,7 @@ public class ViewRoleModelAdvice {
         if (authentication == null || !authentication.isAuthenticated()) {
             model.addAttribute("showUsuarioMenu", false);
             model.addAttribute("showGerenciaMenu", false);
+            model.addAttribute("showGerenteGeneralMenu", false);
             model.addAttribute("displayUserName", "Invitado");
             model.addAttribute("displayUserInitials", "IN");
             return;
@@ -26,19 +27,20 @@ public class ViewRoleModelAdvice {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
 
-        final boolean isGerente = roles.contains("ROLE_GERENTE_SUCURSAL")
-                || roles.contains("ROLE_GERENTE_GENERAL");
+        final boolean isGerenteSucursal = roles.contains("ROLE_GERENTE_SUCURSAL");
+        final boolean isGerenteGeneral  = roles.contains("ROLE_GERENTE_GENERAL");
 
         boolean isUsuario = roles.contains("ROLE_CLIENTE")
                 || roles.contains("ROLE_CAJERO")
                 || roles.contains("ROLE_DEPENDIENTE");
 
-        if (!isGerente && !isUsuario) {
+        if (!isGerenteSucursal && !isGerenteGeneral && !isUsuario) {
             isUsuario = true;
         }
 
         model.addAttribute("showUsuarioMenu", isUsuario);
-        model.addAttribute("showGerenciaMenu", isGerente);
+        model.addAttribute("showGerenciaMenu", isGerenteSucursal);
+        model.addAttribute("showGerenteGeneralMenu", isGerenteGeneral);
         model.addAttribute("displayUserName", authentication.getName());
         model.addAttribute("displayUserInitials", construirIniciales(authentication.getName()));
     }

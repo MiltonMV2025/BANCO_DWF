@@ -1,0 +1,130 @@
+.header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+
+.filters-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filters-row input {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.filters-row input[type="text"] {
+    min-width: 220px;
+}
+
+.filters-row input[type="date"] {
+    min-width: 150px;
+}
+
+.btn-clear {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--text-muted, #6b7280);
+    text-decoration: none;
+    background: #fff;
+    cursor: pointer;
+}
+
+.btn-clear:hover {
+    background: #f3f4f6;
+}
+
+/* Resumen */
+.summary-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(160px, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+}
+
+.summary-card {
+    background: var(--surface, #fff);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--accent);
+    border-radius: 11px;
+    padding: 1rem 1.1rem;
+}
+
+.summary-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 0.2rem;
+}
+
+.summary-label {
+    color: var(--text-muted, #6b7280);
+    font-size: 0.88rem;
+}
+
+/* Tabla */
+.table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.table-wrap table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.table-wrap th,
+.table-wrap td {
+    text-align: left;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.table-wrap th {
+    background: #f3f4f6;
+    color: #374151;
+    font-weight: 700;
+}
+
+.table-wrap tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.32rem 0.72rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.badge.ok   { background: #22c55e; color: #fff; }
+.badge.warn { background: #eab308; color: #111; }
+
+.positive { color: #15803d; font-weight: 700; }
+.negative { color: #b45309; font-weight: 700; }
+
+.empty-row td {
+    text-align: center;
+    color: #9ca3af;
+    padding: 2rem;
+}
+
+@media (max-width: 900px) {
+    .summary-row {
+        grid-template-columns: 1fr;
+    }
+}

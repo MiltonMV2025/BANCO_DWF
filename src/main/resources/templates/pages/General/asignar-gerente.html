@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignar Gerente | Panel Gerente General</title>
+    <link rel="stylesheet" th:href="@{/css/app-shell.css}">
+    <link rel="stylesheet" th:href="@{/css/asignar-gerente.css}">
+</head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{layout/fragments :: topbar}"></header>
+    <aside th:replace="~{layout/fragments :: sidebar('sucursales')}"></aside>
+
+    <main class="content">
+        <section class="header-row">
+            <div>
+                <h1>Asignar Gerente de Sucursal</h1>
+                <p class="subtitle">
+                    Asignando gerente para:
+                    <strong th:text="${sucursal.nombre}">Sucursal</strong>
+                </p>
+            </div>
+            <a th:href="@{/gerencia/general/sucursales}" class="btn-secondary">
+                <i class="bi bi-arrow-left"></i>
+                Volver
+            </a>
+        </section>
+
+        <!-- Info de la sucursal -->
+        <section class="info-card">
+            <div class="info-item">
+                <span class="info-label">Nombre</span>
+                <strong th:text="${sucursal.nombre}">—</strong>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Dirección</span>
+                <strong th:text="${sucursal.direccion}">—</strong>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Estado</span>
+                <span class="badge ok"
+                      th:classappend="${sucursal.estado != null and sucursal.estado.equalsIgnoreCase('ACTIVO')} ? ' ok' : ' warn'"
+                      th:text="${sucursal.estado}">ACTIVO</span>
+            </div>
+        </section>
+
+        <!-- Tabla de candidatos -->
+        <section class="table-section">
+            <h2>Gerentes disponibles</h2>
+            <p class="table-hint">Solo se muestran empleados con rol Gerente de Sucursal en estado Activo.</p>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(candidatos)}" class="empty-row">
+                        <td colspan="4">No hay gerentes de sucursal disponibles para asignar.</td>
+                    </tr>
+                    <tr th:each="candidato : ${candidatos}"
+                        th:attr="data-id=${candidato.idEmpleado},
+                                 data-nombre=${candidato.nombre}">
+                        <td th:text="${candidato.nombre}">Nombre</td>
+                        <td th:text="${candidato.rol}">Rol</td>
+                        <td>
+                            <span class="badge ok">ACTIVO</span>
+                        </td>
+                        <td>
+                            <button type="button" class="link-btn asignar-btn">Asignar</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"
+     th:attr="data-auto-message=${toastMessage}"></div>
+
+<!-- Modal: Confirmar asignación -->
+<div class="modal-backdrop" id="asignar-modal" aria-hidden="true">
+    <div class="modal-card modal-card-sm">
+        <h2 class="modal-title">Confirmar Asignación</h2>
+        <p class="modal-subtitle" id="asignar-text">¿Deseas asignar este gerente a la sucursal?</p>
+        <form id="asignar-form" method="post">
+            <input type="hidden" name="idEmpleado" id="asignar-id-empleado">
+        </form>
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-secondary" id="asignar-cancel">Cancelar</button>
+            <button type="button" class="btn-modal-primary" id="asignar-confirm">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/asignar-gerente.js}"></script>
+</body>
+</html>
