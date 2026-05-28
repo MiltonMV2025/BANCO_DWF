@@ -16,6 +16,7 @@
 
 <aside class="sidebar" th:fragment="sidebar(activeMenu)">
     <nav aria-label="Navegación principal">
+
         <div th:if="${showUsuarioMenu}">
             <span class="menu-role">Panel Usuario</span>
 
@@ -72,6 +73,33 @@
                 <span>Aprobación Créditos</span>
             </a>
         </div>
+
+        <!-- GERENTE GENERAL — bloque exclusivo -->
+        <div th:if="${showGerenteGeneralMenu}">
+            <span class="menu-role">Panel Gerente General</span>
+
+            <a class="nav-item"
+               th:classappend="${activeMenu == 'sucursales'} ? ' active'"
+               th:href="@{/gerencia/general/sucursales}">
+                <i class="bi bi-building nav-icon" aria-hidden="true"></i>
+                <span>Sucursales</span>
+            </a>
+
+            <a class="nav-item"
+               th:classappend="${activeMenu == 'acciones-personal'} ? ' active'"
+               th:href="@{/gerencia/general/acciones-personal}">
+                <i class="bi bi-person-check nav-icon" aria-hidden="true"></i>
+                <span>Acciones de Personal</span>
+            </a>
+
+            <a class="nav-item"
+               th:classappend="${activeMenu == 'movimientos-global'} ? ' active'"
+               th:href="@{/gerencia/general/movimientos}">
+                <i class="bi bi-bar-chart-line nav-icon" aria-hidden="true"></i>
+                <span>Movimientos Globales</span>
+            </a>
+        </div>
+
     </nav>
 </aside>
 </body>

@@ -63,21 +63,27 @@ public class SecurityConfig {
     }
 
     private String resolvePostLoginRedirect(final Authentication authentication) {
-        final boolean isGerente = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_GERENTE_SUCURSAL")
-                        || authority.getAuthority().equals("ROLE_GERENTE_GENERAL"));
+    final boolean isGerenteGeneral = authentication.getAuthorities().stream()
+            .anyMatch(authority -> authority.getAuthority().equals("ROLE_GERENTE_GENERAL"));
 
-        if (isGerente) {
-            return "/gerencia/clientes";
-        }
-
-        final boolean isCliente = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_CLIENTE"));
-
-        if (isCliente) {
-            return "/cliente/inicio";
-        }
-
-        return "/dashboard";
+    if (isGerenteGeneral) {
+        return "/gerencia/general/sucursales";
     }
+
+    final boolean isGerenteSucursal = authentication.getAuthorities().stream()
+            .anyMatch(authority -> authority.getAuthority().equals("ROLE_GERENTE_SUCURSAL"));
+
+    if (isGerenteSucursal) {
+        return "/gerencia/clientes";
+    }
+
+    final boolean isCliente = authentication.getAuthorities().stream()
+            .anyMatch(authority -> authority.getAuthority().equals("ROLE_CLIENTE"));
+
+    if (isCliente) {
+        return "/cliente/inicio";
+    }
+
+    return "/dashboard";
+}
 }

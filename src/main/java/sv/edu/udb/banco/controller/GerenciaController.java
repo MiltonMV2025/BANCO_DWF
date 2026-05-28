@@ -1,4 +1,4 @@
-﻿package sv.edu.udb.banco.controller;
+package sv.edu.udb.banco.controller;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;

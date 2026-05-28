@@ -1,0 +1,255 @@
+src/main/java/sv/edu/udb/banco/
+├── config/
+│   ├── SecurityConfig.java          ← MODIFICADO
+│   └── ViewRoleModelAdvice.java     ← MODIFICADO
+# Resumen del trabajo realizado — Banco Agricultura SV
+
+> **Rol implementado:** Gerente General  
+> **Stack:** Java 17 + Spring Boot 3.5.6 + JPA/Hibernate + SQL Server (Azure) + Thymeleaf  
+> **Estado:** Backend completo + Vistas completas.
+
+---
+
+## 1. Cambios en entidades JPA
+
+### `Sucursal.java` *(nueva — `entity/`)*
+Entidad nueva que representa una sucursal del banco.
+
+| Campo | Tipo | Detalle |
+|---|---|---|
+| `idSucursal` | `Integer` | PK autoincremental |
+| `nombre` | `String` | VARCHAR(120) |
+| `direccion` | `String` | VARCHAR(255) |
+| `estado` | `String` | `ACTIVO` / `INACTIVO` |
+| `empleados` | `Set<Empleado>` | `@OneToMany` lazy, mappedBy="sucursal" |
+
+### `Empleado.java` *(modificado — `entity/`)*
+Se agregó la relación con `Sucursal`:
+
+```java
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "id_sucursal", nullable = true)
+private Sucursal sucursal;
+```
+- `nullable = true` porque un empleado puede existir sin sucursal asignada (ej. estado `EN ESPERA`).
+- Se agregó índice `IX_EMPLEADO_ID_SUCURSAL` en la anotación `@Table`.
+
+---
+
+## 2. Repositorios
+
+### `SucursalRepository.java` *(nuevo — `repository/`)*
+
+```java
+List<Sucursal> findAllByEstado(String estado);
+
+List<Sucursal> buscarSucursales(@Param("q") String q, @Param("estado") String estado);
+
+Optional<Sucursal> findByIdConEmpleados(@Param("id") Integer id);
+```
+
+- `buscarSucursales` — filtros opcionales por nombre, dirección y estado.
+- `findByIdConEmpleados` — fetch join para evitar N+1.
+
+### `MovimientoRepository.java` *(modificado — `repository/`)*
+Se agregó proyección y query global:
+
+```java
+interface MovimientoGlobalRow {
+    Integer getIdMovimiento();
+    String getTipo();
+    BigDecimal getMonto();
+    LocalDate getFecha();
+    String getNumeroCuenta();
+    String getNombreCliente();
+    String getDuiCliente();
+}
+
+List<MovimientoGlobalRow> findMovimientosGlobal(
+    @Param("q") String q,
+    @Param("fechaInicio") LocalDate fechaInicio,
+    @Param("fechaFin") LocalDate fechaFin
+);
+```
+
+- Filtros opcionales: texto libre (nombre, DUI, número de cuenta) y rango de fechas.
+- Los métodos existentes no fueron modificados.
+
+---
+
+## 3. Controlador nuevo
+
+### `GerenciaGeneralController.java` *(nuevo — `controller/`)*
+
+```
+@Controller
+@RequestMapping("/gerencia/general")
+@Secured("ROLE_GERENTE_GENERAL")
+```
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | `/sucursales` | Listar sucursales con filtros opcionales |
+| POST | `/sucursales` | Crear nueva sucursal (estado inicial ACTIVO) |
+| POST | `/sucursales/{id}/inactivar` | Inactivar sucursal |
+| GET | `/sucursales/{id}/asignar-gerente` | Vista con candidatos disponibles |
+| POST | `/sucursales/{id}/asignar-gerente` | Asignar gerente (valida rol GERENTE_SUCURSAL y estado ACTIVO) |
+| GET | `/acciones-personal` | Listar empleados en estado EN ESPERA |
+| POST | `/acciones-personal/{id}/aprobar` | Aprobar empleado → estado ACTIVO |
+| POST | `/acciones-personal/{id}/rechazar` | Rechazar empleado → estado INACTIVO |
+| GET | `/movimientos` | Todos los movimientos globales con filtros |
+
+**Reglas de negocio implementadas en el controlador:**
+- Al asignar gerente: valida que el empleado tenga rol `GERENTE_SUCURSAL` y estado `ACTIVO` — tanto en el GET (filtra candidatos) como en el POST (revalida).
+- Al aprobar/rechazar: valida que el empleado esté en estado `EN ESPERA` antes de cambiar el estado.
+
+---
+
+## 4. Configuración y seguridad
+
+### `SecurityConfig.java` *(modificado — `config/`)*
+Solo se modificó `resolvePostLoginRedirect`:
+
+```java
+// ANTES: ambos gerentes iban a /gerencia/clientes
+// AHORA:
+// - GERENTE_GENERAL  → /gerencia/general/sucursales
+// - GERENTE_SUCURSAL → /gerencia/clientes
+```
+
+El resto del archivo no se tocó. La regla `.requestMatchers("/gerencia/general/**").hasRole("GERENTE_GENERAL")` ya existía y es suficiente.
+
+### `ViewRoleModelAdvice.java` *(modificado — `config/`)*
+Se separaron los flags del sidebar:
+
+```java
+// ANTES
+model.addAttribute("showGerenciaMenu", isGerente); // incluía ambos roles
+
+// AHORA
+model.addAttribute("showGerenciaMenu", isGerenteSucursal);      // solo GERENTE_SUCURSAL
+model.addAttribute("showGerenteGeneralMenu", isGerenteGeneral); // solo GERENTE_GENERAL (nuevo)
+```
+
+### `fragments.html` *(modificado — `templates/layout/`)*
+Se agregó bloque exclusivo al final del sidebar:
+
+```html
+<div th:if="${showGerenteGeneralMenu}">
+    <span class="menu-role">Panel Gerente General</span>
+    <!-- Sucursales        → /gerencia/general/sucursales -->
+    <!-- Acciones Personal → /gerencia/general/acciones-personal -->
+    <!-- Movimientos       → /gerencia/general/movimientos -->
+</div>
+```
+
+- El Gerente General **solo ve su propio menú** — no ve el Panel Gerencia ni el Panel Usuario.
+- `asignar-gerente` no tiene link en el sidebar; se accede desde el botón "Asignar Gerente" en la tabla de sucursales.
+
+---
+
+## 5. Migración de base de datos (SQL Server - Azure)
+
+Scripts ejecutados manualmente en el servidor Azure:
+
+```sql
+-- Tabla nueva
+CREATE TABLE sucursal (
+    id_sucursal INT IDENTITY(1,1) NOT NULL,
+    nombre      VARCHAR(120) NOT NULL,
+    direccion   VARCHAR(255) NOT NULL,
+    estado      VARCHAR(20)  NOT NULL,
+    CONSTRAINT PK_SUCURSAL PRIMARY KEY (id_sucursal)
+);
+CREATE INDEX IX_SUCURSAL_ESTADO ON sucursal (estado);
+
+-- Columna nueva en empleado
+ALTER TABLE empleado ADD id_sucursal INT NULL;
+CREATE INDEX IX_EMPLEADO_ID_SUCURSAL ON empleado (id_sucursal);
+ALTER TABLE empleado ADD CONSTRAINT FK_EMPLEADO_SUCURSAL
+    FOREIGN KEY (id_sucursal) REFERENCES sucursal (id_sucursal);
+```
+
+Usuario de prueba insertado:
+
+```sql
+-- Rol
+INSERT INTO rol (codigo, nombre, estado)
+VALUES ('ROLE_GERENTE_GENERAL', 'Gerente General', '1');
+
+-- Usuario (contraseña: admin123)
+INSERT INTO usuario (username, password_hash, estado)
+VALUES ('gerente.general', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LjTVWhsfARG', '1');
+
+-- Asignar rol
+INSERT INTO usuario_rol (id_usuario, id_rol)
+SELECT u.id_usuario, r.id_rol
+FROM usuario u, rol r
+WHERE u.username = 'gerente.general'
+  AND r.codigo   = 'ROLE_GERENTE_GENERAL';
+```
+
+- **Usuario:** `gerente.general`
+- **Contraseña:** `admin123`
+- **URL:** `http://localhost:8080/login`
+
+---
+
+## 6. Vistas
+
+Todas siguen el patrón existente del proyecto: `app-shell` + fragmentos Thymeleaf + toast con `data-auto-message`.
+
+| Vista | Ruta template | CSS | JS |
+|---|---|---|---|
+| Sucursales | `pages/general/sucursales.html` | `sucursales.css` | `sucursales.js` |
+| Asignar Gerente | `pages/general/asignar-gerente.html` | `asignar-gerente.css` | `asignar-gerente.js` |
+| Acciones de Personal | `pages/general/acciones-personal.html` | `acciones-personal.css` | `acciones-personal.js` |
+| Movimientos Globales | `pages/general/movimientos.html` | `movimientos-global.css` | `movimientos-global.js` |
+
+CSS y JS en `src/main/resources/static/css/` y `static/js/` respectivamente.
+
+
+---
+
+## Estructura de archivos nuevos/modificados
+
+```
+src/main/java/sv/edu/udb/banco/
+├── config/
+│   ├── SecurityConfig.java          ← MODIFICADO
+│   └── ViewRoleModelAdvice.java     ← MODIFICADO
+├── controller/
+│   └── GerenciaGeneralController.java ← NUEVO
+├── entity/
+│   ├── Empleado.java                ← MODIFICADO
+│   └── Sucursal.java                ← NUEVO
+└── repository/
+    ├── MovimientoRepository.java    ← MODIFICADO
+    └── SucursalRepository.java      ← NUEVO
+
+src/main/resources/
+├── static/
+│   ├── css/
+│   │   ├── sucursales.css           ← NUEVO
+│   │   ├── asignar-gerente.css      ← NUEVO
+│   │   ├── acciones-personal.css    ← NUEVO
+│   │   └── movimientos-global.css   ← NUEVO
+│   └── js/
+│       ├── sucursales.js            ← NUEVO
+│       ├── asignar-gerente.js       ← NUEVO
+│       ├── acciones-personal.js     ← NUEVO
+│       └── movimientos-global.js    ← NUEVO
+└── templates/
+    ├── layout/
+    │   └── fragments.html           ← MODIFICADO
+    └── pages/
+        └── general/                 ← CARPETA NUEVA
+            ├── sucursales.html
+            ├── asignar-gerente.html
+            ├── acciones-personal.html
+            └── movimientos.html
+```
+
+
+
+

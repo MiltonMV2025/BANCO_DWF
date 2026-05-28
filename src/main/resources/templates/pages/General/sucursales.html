@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sucursales | Panel Gerente General</title>
+    <link rel="stylesheet" th:href="@{/css/app-shell.css}">
+    <link rel="stylesheet" th:href="@{/css/sucursales.css}">
+</head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{layout/fragments :: topbar}"></header>
+    <aside th:replace="~{layout/fragments :: sidebar('sucursales')}"></aside>
+
+    <main class="content">
+        <section class="header-row">
+            <div>
+                <h1>Sucursales</h1>
+                <p class="subtitle">Gestión y expansión de sucursales del banco</p>
+            </div>
+            <button type="button" class="btn-primary" id="new-branch-btn">
+                <i class="bi bi-plus"></i>
+                Nueva Sucursal
+            </button>
+        </section>
+
+        <form class="filters-row" method="get" th:action="@{/gerencia/general/sucursales}">
+            <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre o dirección">
+            <select name="estado">
+                <option value="" th:selected="${estado == null or estado.isEmpty()}">Todos los estados</option>
+                <option value="ACTIVO" th:selected="${estado == 'ACTIVO'}">Activas</option>
+                <option value="INACTIVO" th:selected="${estado == 'INACTIVO'}">Inactivas</option>
+            </select>
+            <button type="submit" class="btn-secondary">Filtrar</button>
+        </form>
+
+        <section class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Dirección</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(sucursales)}" class="empty-row">
+                    <td colspan="4">No hay sucursales registradas.</td>
+                </tr>
+                <tr th:each="sucursal : ${sucursales}"
+                    th:attr="data-id=${sucursal.idSucursal},
+                             data-nombre=${sucursal.nombre},
+                             data-direccion=${sucursal.direccion},
+                             data-estado=${sucursal.estado}">
+                    <td th:text="${sucursal.nombre}">Nombre</td>
+                    <td th:text="${sucursal.direccion}">Dirección</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${sucursal.estado != null and sucursal.estado.equalsIgnoreCase('ACTIVO')} ? ' ok' : ' warn'"
+                              th:text="${sucursal.estado}">ACTIVO</span>
+                    </td>
+                    <td>
+                        <a class="link-btn"
+                           th:href="@{/gerencia/general/sucursales/{id}/asignar-gerente(id=${sucursal.idSucursal})}">
+                            Asignar Gerente
+                        </a>
+                        <span class="action-divider">|</span>
+                        <button type="button" class="link-btn delete-btn">Inactivar</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"
+     th:attr="data-auto-message=${toastMessage}"></div>
+
+<!-- Modal: Nueva Sucursal -->
+<div class="modal-backdrop" id="branch-modal" aria-hidden="true">
+    <div class="modal-card">
+        <h2 class="modal-title">Nueva Sucursal</h2>
+        <p class="modal-subtitle">Registrar nueva sucursal del banco</p>
+
+        <form id="branch-form" class="crud-form" method="post"
+              th:action="@{/gerencia/general/sucursales}">
+            <div class="crud-grid">
+                <div class="crud-field">
+                    <label for="branch-name">Nombre</label>
+                    <input id="branch-name" name="nombre" type="text" required maxlength="120">
+                </div>
+                <div class="crud-field">
+                    <label for="branch-address">Dirección</label>
+                    <input id="branch-address" name="direccion" type="text" required maxlength="255">
+                </div>
+            </div>
+        </form>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-secondary" id="branch-cancel">Cancelar</button>
+            <button type="button" class="btn-modal-primary" id="branch-save">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirmar Inactivar -->
+<div class="modal-backdrop" id="branch-delete-modal" aria-hidden="true">
+    <div class="modal-card modal-card-sm">
+        <h2 class="modal-title">Inactivar Sucursal</h2>
+        <p class="modal-subtitle" id="branch-delete-text">¿Deseas inactivar esta sucursal?</p>
+        <form id="branch-delete-form" method="post"></form>
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-secondary" id="branch-delete-cancel">Cancelar</button>
+            <button type="button" class="btn-modal-danger" id="branch-delete-confirm">Inactivar</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/sucursales.js}"></script>
+</body>
+</html>

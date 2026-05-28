@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movimientos Globales | Panel Gerente General</title>
+    <link rel="stylesheet" th:href="@{/css/app-shell.css}">
+    <link rel="stylesheet" th:href="@{/css/movimientos-global.css}">
+</head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{layout/fragments :: topbar}"></header>
+    <aside th:replace="~{layout/fragments :: sidebar('movimientos-global')}"></aside>
+
+    <main class="content">
+        <section class="header-row">
+            <div>
+                <h1>Movimientos Globales</h1>
+                <p class="subtitle">Todos los movimientos de todas las cuentas del banco</p>
+            </div>
+        </section>
+
+        <form class="filters-row" method="get"
+              th:action="@{/gerencia/general/movimientos}">
+            <input type="text" name="q" th:value="${q}"
+                   placeholder="Buscar por cliente, DUI o N° cuenta">
+            <input type="date" name="fechaInicio"
+                   th:value="${fechaInicio}">
+            <input type="date" name="fechaFin"
+                   th:value="${fechaFin}">
+            <button type="submit" class="btn-secondary">Filtrar</button>
+            <a th:href="@{/gerencia/general/movimientos}" class="btn-clear">
+                Limpiar
+            </a>
+        </form>
+
+        <!-- Resumen rápido -->
+        <section class="summary-row" th:if="${not #lists.isEmpty(movimientos)}">
+            <article class="summary-card">
+                <p class="summary-value" th:text="${#lists.size(movimientos)}">0</p>
+                <p class="summary-label">Total movimientos</p>
+            </article>
+            <article class="summary-card">
+                <p class="summary-value"
+                   th:text="${'$' + #numbers.formatDecimal(totalDepositos, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+                <p class="summary-label">Total depósitos</p>
+            </article>
+            <article class="summary-card">
+                <p class="summary-value"
+                   th:text="${'$' + #numbers.formatDecimal(totalRetiros, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+                <p class="summary-label">Total retiros</p>
+            </article>
+        </section>
+
+        <section class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>DUI</th>
+                    <th>N° Cuenta</th>
+                    <th>Tipo</th>
+                    <th>Monto</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(movimientos)}" class="empty-row">
+                    <td colspan="7">No hay movimientos registrados.</td>
+                </tr>
+                <tr th:each="mov : ${movimientos}">
+                    <td th:text="${mov.idMovimiento}">1</td>
+                    <td th:text="${mov.fecha}">2024-01-01</td>
+                    <td th:text="${mov.nombreCliente}">Cliente</td>
+                    <td th:text="${mov.duiCliente}">00000000-0</td>
+                    <td th:text="${mov.numeroCuenta}">AHO-00000001</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${mov.tipo != null and mov.tipo.equalsIgnoreCase('DEPOSITO')} ? ' ok' : ' warn'"
+                              th:text="${mov.tipo}">TIPO</span>
+                    </td>
+                    <td th:text="${'$' + #numbers.formatDecimal(mov.monto, 1, 'COMMA', 2, 'POINT')}"
+                        th:classappend="${mov.tipo != null and mov.tipo.equalsIgnoreCase('DEPOSITO')} ? ' positive' : ' negative'">
+                        $0.00
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"
+     th:attr="data-auto-message=${toastMessage}"></div>
+
+<script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/movimientos-global.js}"></script>
+</body>
+</html>

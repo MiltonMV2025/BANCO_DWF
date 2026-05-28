@@ -1,0 +1,102 @@
+.header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+
+.info-card {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--accent);
+    border-radius: 11px;
+    padding: 1.1rem 1.4rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.info-label {
+    font-size: 0.8rem;
+    color: var(--text-muted, #6b7280);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.table-section h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+}
+
+.table-hint {
+    font-size: 0.88rem;
+    color: var(--text-muted, #6b7280);
+    margin-bottom: 0.85rem;
+}
+
+.table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.table-wrap table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.table-wrap th,
+.table-wrap td {
+    text-align: left;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.table-wrap th {
+    background: #f3f4f6;
+    color: #374151;
+    font-weight: 700;
+}
+
+.table-wrap tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.32rem 0.72rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.badge.ok   { background: #22c55e; color: #fff; }
+.badge.warn { background: #eab308; color: #111; }
+
+.link-btn {
+    background: none;
+    border: none;
+    color: var(--accent, #2563eb);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.empty-row td {
+    text-align: center;
+    color: #9ca3af;
+    padding: 2rem;
+}
