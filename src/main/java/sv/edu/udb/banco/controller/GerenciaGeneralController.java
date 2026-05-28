@@ -1,6 +1,7 @@
 package sv.edu.udb.banco.controller;
 
 import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.security.access.annotation.Secured;
@@ -54,7 +55,7 @@ public class GerenciaGeneralController {
         model.addAttribute("sucursales", sucursales);
         model.addAttribute("q", q);
         model.addAttribute("estado", estado);
-        return "gerencia/general/sucursales";
+        return "pages/General/sucursales";
     }
 
     @PostMapping("/sucursales")
@@ -115,7 +116,7 @@ public class GerenciaGeneralController {
 
         model.addAttribute("sucursal", sucursal);
         model.addAttribute("candidatos", candidatos);
-        return "gerencia/general/asignar-gerente";
+        return "pages/General/asignar-gerente";
     }
 
     @PostMapping("/sucursales/{id}/asignar-gerente")
@@ -169,7 +170,7 @@ public class GerenciaGeneralController {
 
         model.addAttribute("pendientes", pendientes);
         model.addAttribute("q", q);
-        return "gerencia/general/acciones-personal";
+        return "pages/General/acciones-personal";
     }
 
     @PostMapping("/acciones-personal/{id}/aprobar")
@@ -236,10 +237,25 @@ public class GerenciaGeneralController {
         final List<MovimientoRepository.MovimientoGlobalRow> movimientos =
                 movimientoRepository.findMovimientosGlobal(q, fechaInicio, fechaFin);
 
+        BigDecimal totalDepositos = BigDecimal.ZERO;
+        BigDecimal totalRetiros = BigDecimal.ZERO;
+        for (MovimientoRepository.MovimientoGlobalRow mov : movimientos) {
+            if (mov == null || mov.getMonto() == null || mov.getTipo() == null) {
+                continue;
+            }
+            if ("DEPOSITO".equalsIgnoreCase(mov.getTipo())) {
+                totalDepositos = totalDepositos.add(mov.getMonto());
+            } else if ("RETIRO".equalsIgnoreCase(mov.getTipo())) {
+                totalRetiros = totalRetiros.add(mov.getMonto());
+            }
+        }
+
         model.addAttribute("movimientos", movimientos);
+        model.addAttribute("totalDepositos", totalDepositos);
+        model.addAttribute("totalRetiros", totalRetiros);
         model.addAttribute("q", q);
         model.addAttribute("fechaInicio", fechaInicio);
         model.addAttribute("fechaFin", fechaFin);
-        return "gerencia/general/movimientos";
+        return "pages/General/movimientos";
     }
 }
