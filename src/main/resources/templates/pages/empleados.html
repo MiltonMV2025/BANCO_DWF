@@ -25,7 +25,7 @@
         </section>
 
         <form class="filters-row" method="get" th:action="@{/gerencia/empleados}">
-            <input type="text" id="search-employee" name="q" th:value="${qEmpleados}" placeholder="Buscar por nombre o rol">
+            <input type="text" id="search-employee" name="q" th:value="${qEmpleados}" placeholder="Buscar por nombre, DUI o rol">
             <select id="status-filter-employee" name="estado">
                 <option value="" th:selected="${estadoEmpleados == null or estadoEmpleados.isEmpty()}">Todos los estados</option>
                 <option value="ACTIVO" th:selected="${estadoEmpleados == 'ACTIVO'}">Activos</option>
@@ -39,6 +39,7 @@
                 <thead>
                 <tr>
                     <th>Empleado</th>
+                    <th>DUI</th>
                     <th>Cargo</th>
                     <th>Préstamos asignados</th>
                     <th>Estado</th>
@@ -47,16 +48,18 @@
                 </thead>
                 <tbody>
                 <tr th:if="${#lists.isEmpty(empleados)}" class="empty-row">
-                    <td colspan="5">No hay empleados registrados.</td>
+                    <td colspan="6">No hay empleados registrados.</td>
                 </tr>
                 <tr th:each="empleado : ${empleados}"
                     th:attr="data-id=${empleado.idEmpleado},
                              data-nombre=${empleado.nombre},
+                             data-dui=${empleado.dui},
                              data-rol=${empleado.rol},
                              data-estado=${empleado.estado},
                              data-prestamos=${empleado.prestamosAsignados}">
                     <td th:text="${empleado.nombre}">Nombre</td>
-                    <td th:text="${empleado.rol}">Cargo</td>
+                    <td th:text="${empleado.dui}">00000000-0</td>
+                    <td th:text="${rolesEmpleadoMap[empleado.rol] ?: empleado.rol}">Cargo</td>
                     <td th:text="${empleado.prestamosAsignados}">0</td>
                     <td>
                         <span class="badge"
@@ -90,6 +93,10 @@
         </div>
 
         <div class="profile-grid">
+            <div class="profile-item">
+                <span class="profile-label">DUI</span>
+                <strong id="employee-profile-username">00000000-0</strong>
+            </div>
             <div class="profile-item">
                 <span class="profile-label">Cargo</span>
                 <strong id="employee-profile-role">Analista</strong>
@@ -128,7 +135,7 @@
 <div class="modal-backdrop" id="employee-modal" aria-hidden="true">
     <div class="modal-card">
         <h2 class="modal-title" id="employee-modal-title">Nuevo Empleado</h2>
-        <p class="modal-subtitle">Formulario CRUD conectado a base de datos</p>
+        <p class="modal-subtitle">Gestiona la información y acceso del colaborador.</p>
 
         <form id="employee-form" class="crud-form" method="post" th:action="@{/gerencia/empleados}">
             <div class="crud-grid">
@@ -138,8 +145,26 @@
                 </div>
 
                 <div class="crud-field">
+                    <label for="employee-dui">DUI</label>
+                    <input id="employee-dui" name="dui" type="text" required maxlength="10" minlength="10" pattern="\d{8}-\d" inputmode="numeric" autocomplete="off" placeholder="12345678-9">
+                </div>
+
+                <div class="crud-field">
                     <label for="employee-role">Rol</label>
-                    <input id="employee-role" name="rol" type="text" required maxlength="50">
+                    <select id="employee-role" name="rol" required>
+                        <option value="">Selecciona un rol</option>
+                        <option th:each="rol : ${rolesEmpleado}" th:value="${rol.codigo}" th:text="${rol.nombre}">Rol</option>
+                    </select>
+                </div>
+
+                <div class="crud-field">
+                    <label for="employee-password">Contraseña</label>
+                    <input id="employee-password" name="password" type="password" minlength="6" placeholder="Mínimo 6 caracteres">
+                </div>
+
+                <div class="crud-field">
+                    <label for="employee-password-confirm">Confirmar contraseña</label>
+                    <input id="employee-password-confirm" name="confirmarPassword" type="password" minlength="6" placeholder="Repite la contraseña">
                 </div>
 
                 <div class="crud-field">
@@ -150,6 +175,7 @@
                     </select>
                 </div>
             </div>
+            <p class="modal-subtitle" id="employee-username-note">Usuario de acceso: se utilizará este DUI para iniciar sesión.</p>
         </form>
 
         <div class="modal-actions">
@@ -172,6 +198,7 @@
 </div>
 
 <script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/dui-mask.js}"></script>
 <script th:src="@{/js/empleados.js}"></script>
 </body>
 </html>

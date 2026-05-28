@@ -77,6 +77,14 @@ public class Usuario {
     }
 
     public void setRoles(final Set<Rol> roles) {
-        this.roles = roles;
+        if (this.roles == null) {
+            this.roles = new LinkedHashSet<>();
+        } else {
+            this.roles.clear();
+        }
+
+        if (roles != null) {
+            this.roles.addAll(roles);
+        }
     }
 }

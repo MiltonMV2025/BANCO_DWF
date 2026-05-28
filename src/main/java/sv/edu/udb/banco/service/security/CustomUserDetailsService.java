@@ -24,8 +24,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
-        final Usuario usuario = usuarioRepository.findByUsernameAndEstado(username, "A")
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado o inactivo: " + username));
+        final String usernameNormalizado = username == null ? "" : username.trim();
+
+        final Usuario usuario = buscarUsuarioActivo(usernameNormalizado)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado o inactivo: " + usernameNormalizado));
 
         final Set<GrantedAuthority> authorities = usuario.getRoles().stream()
                 .map(rol -> new SimpleGrantedAuthority(rol.getCodigo()))
@@ -36,5 +38,20 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .password(usuario.getPasswordHash())
                 .authorities(authorities)
                 .build();
+    }
+
+    private java.util.Optional<Usuario> buscarUsuarioActivo(final String username) {
+        final java.util.Optional<Usuario> exacto = usuarioRepository.findByUsernameIgnoreCaseAndEstado(username, "A");
+        if (exacto.isPresent()) {
+            return exacto;
+        }
+
+        final String soloDigitos = username.replaceAll("[^0-9]", "");
+        if (soloDigitos.length() == 9) {
+            final String duiConGuion = soloDigitos.substring(0, 8) + "-" + soloDigitos.substring(8);
+            return usuarioRepository.findByUsernameIgnoreCaseAndEstado(duiConGuion, "A");
+        }
+
+        return java.util.Optional.empty();
     }
 }

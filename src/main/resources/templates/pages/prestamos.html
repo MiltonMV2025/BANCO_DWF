@@ -95,7 +95,7 @@
 
                         <div class="field-group">
                             <label for="loan-dui">DUI del cliente</label>
-                            <input id="loan-dui" name="dui" type="text" placeholder="00000000-0" required>
+                            <input id="loan-dui" name="dui" type="text" required maxlength="10" minlength="10" pattern="\d{8}-\d" inputmode="numeric" autocomplete="off" placeholder="00000000-0">
                         </div>
                     </div>
 
@@ -126,6 +126,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite" th:attr="data-auto-message=${toastMessage}"></div>
 
 <script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/dui-mask.js}"></script>
 <script th:src="@{/js/prestamos.js}"></script>
 </body>
 </html>

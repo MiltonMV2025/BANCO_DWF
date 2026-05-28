@@ -90,6 +90,7 @@ GO
 CREATE TABLE [dbo].[empleado](
 	[id_empleado] [int] IDENTITY(1,1) NOT NULL,
 	[nombre] [varchar](120) NOT NULL,
+	[dui] [varchar](10) NOT NULL,
 	[rol] [varchar](50) NOT NULL,
 	[estado] [varchar](20) NOT NULL,
  CONSTRAINT [PK_EMPLEADO] PRIMARY KEY CLUSTERED 
@@ -287,6 +288,20 @@ CREATE NONCLUSTERED INDEX [IX_EMPLEADO_ESTADO] ON [dbo].[empleado]
 (
 	[estado] ASC
 )WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_EMPLEADO_DUI]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+CREATE NONCLUSTERED INDEX [IX_EMPLEADO_DUI] ON [dbo].[empleado]
+(
+	[dui] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, DROP_EXISTING = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UQ_EMPLEADO_DUI]    Script Date: 22/05/2026 08:38:47 a. m. ******/
+ALTER TABLE [dbo].[empleado] ADD  CONSTRAINT [UQ_EMPLEADO_DUI] UNIQUE NONCLUSTERED 
+(
+	[dui] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
 /****** Object:  Index [flyway_schema_history_s_idx]    Script Date: 22/05/2026 08:38:47 a. m. ******/
 CREATE NONCLUSTERED INDEX [flyway_schema_history_s_idx] ON [dbo].[flyway_schema_history]

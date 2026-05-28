@@ -133,7 +133,7 @@
 <div class="modal-backdrop" id="client-modal" aria-hidden="true">
     <div class="modal-card">
         <h2 class="modal-title" id="client-modal-title">Nuevo Cliente</h2>
-        <p class="modal-subtitle">Formulario CRUD conectado a base de datos</p>
+        <p class="modal-subtitle">Completa la información del cliente para continuar.</p>
 
         <form id="client-form" class="crud-form" method="post" th:action="@{/gerencia/clientes}">
             <div class="crud-grid">
@@ -144,7 +144,7 @@
 
                 <div class="crud-field">
                     <label for="client-dui">DUI</label>
-                    <input id="client-dui" name="dui" type="text" required maxlength="10" placeholder="00000000-0">
+                    <input id="client-dui" name="dui" type="text" required maxlength="10" minlength="10" pattern="\d{8}-\d" inputmode="numeric" autocomplete="off" placeholder="00000000-0">
                 </div>
 
                 <div class="crud-field">
@@ -183,6 +183,7 @@
 </div>
 
 <script th:src="@{/js/app-shell.js}"></script>
+<script th:src="@{/js/dui-mask.js}"></script>
 <script th:src="@{/js/clientes.js}"></script>
 </body>
 </html>

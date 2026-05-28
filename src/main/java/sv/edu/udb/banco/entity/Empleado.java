@@ -19,6 +19,7 @@ import jakarta.persistence.Table;
 @Table(
         name = "empleado",
         indexes = {
+                @Index(name = "IX_EMPLEADO_DUI", columnList = "dui"),
                 @Index(name = "IX_EMPLEADO_ESTADO", columnList = "estado"),
                 @Index(name = "IX_EMPLEADO_ID_SUCURSAL", columnList = "id_sucursal")
         }
@@ -32,6 +33,9 @@ public class Empleado {
 
     @Column(name = "nombre", nullable = false, length = 120)
     private String nombre;
+
+    @Column(name = "dui", nullable = false, length = 10, unique = true)
+    private String dui;
 
     @Column(name = "rol", nullable = false, length = 50)
     private String rol;
@@ -60,6 +64,14 @@ public class Empleado {
 
     public void setNombre(final String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getDui() {
+        return dui;
+    }
+
+    public void setDui(final String dui) {
+        this.dui = dui;
     }
 
     public String getRol() {
